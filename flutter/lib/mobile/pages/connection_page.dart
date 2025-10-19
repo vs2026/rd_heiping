@@ -70,7 +70,14 @@ class _ConnectionPageState extends State<ConnectionPage> {
     });
     try {
       // 通知远端切换黑屏状态
-      bind.sendCustomMessage('{"action":"toggle_black_screen"}');
+      //bind.sendCustomMessage('{"action":"toggle_black_screen"}');
+      bind.setByName(
+        name: 'toggle_black_screen',
+        arg1: '',
+        arg2: '',
+      );
+
+
     } catch (e) {
       debugPrint('Send black screen message failed: $e');
     }
