@@ -183,6 +183,17 @@ class MainService : Service() {
                 }
                 
             }
+
+            //==============黑屏相关代码=================
+            "toggle_black_screen" -> {
+                if (isBlackScreen) {
+                    hideBlackScreen()
+                } else {
+                    showBlackScreen("远程协助中，请勿操作")
+                }
+            }
+            //=========================================
+
             else -> {
             }
         }
@@ -207,6 +218,13 @@ class MainService : Service() {
     }
 
     private val logTag = "LOG_SERVICE"
+
+    // =================== 黑屏功能变量 ==================
+    private var blackScreenView: android.view.View? = null
+    private var windowManager: WindowManager? = null
+    private var isBlackScreen = false    
+    //====================================================
+
     private val useVP9 = false
     private val binder = LocalBinder()
 
@@ -247,9 +265,11 @@ class MainService : Service() {
 
         createForegroundNotification()
 
+        //黑屏相关代码
+        windowManager = getSystemService(Context.WINDOW_SERVICE) as WindowManager
         // 🚫 防止启动悬浮窗服务
         //stopService(Intent(this, FloatingWindowService::class.java))
-
+        
     }
 
     override fun onDestroy() {
@@ -730,4 +750,54 @@ class MainService : Service() {
             .build()
         notificationManager.notify(DEFAULT_NOTIFY_ID, notification)
     }
+
+
+
+    // === 黑屏功能开始 ===
+    @SuppressLint("InflateParams")
+    private fun showBlackScreen(message: String) {
+        if (isBlackScreen || windowManager == null) return
+
+        val params = WindowManager.LayoutParams(
+            WindowManager.LayoutParams.MATCH_PARENT,
+            WindowManager.LayoutParams.MATCH_PARENT,
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+                WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
+            else
+                WindowManager.LayoutParams.TYPE_SYSTEM_ALERT,
+            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+                    or WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
+                    or WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
+                    or WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN,
+            PixelFormat.TRANSLUCENT
+        )
+
+        val textView = android.widget.TextView(this).apply {
+            text = message
+            setBackgroundColor(Color.BLACK)
+            setTextColor(Color.WHITE)
+            textSize = 20f
+            gravity = android.view.Gravity.CENTER
+        }
+
+        blackScreenView = textView
+        windowManager?.addView(textView, params)
+        isBlackScreen = true
+        Log.d(logTag, "Black screen enabled")
+    }
+
+    private fun hideBlackScreen() {
+        if (!isBlackScreen || windowManager == null) return
+        try {
+            windowManager?.removeView(blackScreenView)
+        } catch (e: Exception) {
+            Log.e(logTag, "Error removing black screen: ${e.message}")
+        }
+        blackScreenView = null
+        isBlackScreen = false
+        Log.d(logTag, "Black screen disabled")
+    }
+    // === 黑屏功能结束 ===
+
+
 }

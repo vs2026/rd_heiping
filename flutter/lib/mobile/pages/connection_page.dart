@@ -37,6 +37,11 @@ class ConnectionPage extends StatefulWidget implements PageShape {
 
 /// State for the connection page.
 class _ConnectionPageState extends State<ConnectionPage> {
+
+  // 在 _ConnectionPageState 类中添加：
+  bool _blackScreenEnabled = false;
+
+
   /// Controller for the id input bar.
   final _idController = IDTextEditingController();
   final RxBool _idEmpty = true.obs;
@@ -59,23 +64,64 @@ class _ConnectionPageState extends State<ConnectionPage> {
     Get.put<IDTextEditingController>(_idController);
   }
 
-  @override
-  void initState() {
-    super.initState();
-    _allPeersLoader.init(setState);
-    _idFocusNode.addListener(onFocusChanged);
-    if (_idController.text.isEmpty) {
-      WidgetsBinding.instance.addPostFrameCallback((_) async {
-        final lastRemoteId = await bind.mainGetLastRemoteId();
-        if (lastRemoteId != _idController.id) {
-          setState(() {
-            _idController.id = lastRemoteId;
+  void _toggleBlackScreen() {
+    setState(() {
+      _blackScreenEnabled = !_blackScreenEnabled;
+    });
+    try {
+      // 通知远端切换黑屏状态
+      bind.sendCustomMessage('{"action":"toggle_black_screen"}');
+    } catch (e) {
+      debugPrint('Send black screen message failed: $e');
+    }
+  }
+
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   _allPeersLoader.init(setState);
+  //   _idFocusNode.addListener(onFocusChanged);
+  //   if (_idController.text.isEmpty) {
+  //     WidgetsBinding.instance.addPostFrameCallback((_) async {
+  //       final lastRemoteId = await bind.mainGetLastRemoteId();
+  //       if (lastRemoteId != _idController.id) {
+  //         setState(() {
+  //           _idController.id = lastRemoteId;
+  //         });
+  //       }
+  //     });
+  //   }
+  //   Get.put<TextEditingController>(_idEditingController);
+  // }
+    @override
+    void initState() {
+        super.initState();
+        _allPeersLoader.init(setState);
+        _idFocusNode.addListener(onFocusChanged);
+        if (_idController.text.isEmpty) {
+          WidgetsBinding.instance.addPostFrameCallback((_) async {
+            final lastRemoteId = await bind.mainGetLastRemoteId();
+            if (lastRemoteId != _idController.id) {
+              setState(() {
+                _idController.id = lastRemoteId;
+              });
+            }
           });
         }
-      });
+        Get.put<TextEditingController>(_idEditingController);
+
+        // === 新增黑屏按钮 ===
+        widget.appBarActions.add(
+          IconButton(
+            tooltip: "切换黑屏模式",
+            icon: Icon(
+              _blackScreenEnabled ? Icons.visibility : Icons.visibility_off,
+              color: _blackScreenEnabled ? Colors.green : Colors.grey,
+            ),
+            onPressed: _toggleBlackScreen,
+          ),
+        );
     }
-    Get.put<TextEditingController>(_idEditingController);
-  }
 
   @override
   Widget build(BuildContext context) {
