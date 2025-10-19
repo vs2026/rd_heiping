@@ -3037,9 +3037,11 @@ class FFI {
   var closed = false;
   var auditNote = '';
 
+  /// 添加 bind 字段
+  late final BindInterface bind;
+
   /// dialogManager use late to ensure init after main page binding [globalKey]
   late final dialogManager = OverlayDialogManager();
-
   late final SessionID sessionId;
   late final ImageModel imageModel; // session
   late final FfiModel ffiModel; // session
@@ -3071,6 +3073,9 @@ class FFI {
   FFI(SessionID? sId) {
     sessionId = sId ?? (isDesktop ? Uuid().v4obj() : _constSessionId);
     imageModel = ImageModel(WeakReference(this));
+
+    bind = BindInterface();
+
     ffiModel = FfiModel(WeakReference(this));
     cursorModel = CursorModel(WeakReference(this));
     canvasModel = CanvasModel(WeakReference(this));
