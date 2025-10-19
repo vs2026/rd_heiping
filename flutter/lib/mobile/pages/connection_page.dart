@@ -64,23 +64,37 @@ class _ConnectionPageState extends State<ConnectionPage> {
     Get.put<IDTextEditingController>(_idController);
   }
 
-  void _toggleBlackScreen() {
-    setState(() {
-      _blackScreenEnabled = !_blackScreenEnabled;
-    });
-    try {
-      // 通知远端切换黑屏状态
-      //bind.sendCustomMessage('{"action":"toggle_black_screen"}');
-      bind.setByName(
-        name: 'toggle_black_screen',
-        arg1: '',
-        arg2: '',
-      );
+  // void _toggleBlackScreen() {
+  //   setState(() {
+  //     _blackScreenEnabled = !_blackScreenEnabled;
+  //   });
+  //   try {
+  //     // 通知远端切换黑屏状态
+  //     //bind.sendCustomMessage('{"action":"toggle_black_screen"}');
+  //     bind.setByName(
+  //       name: 'toggle_black_screen',
+  //       arg1: '',
+  //       arg2: '',
+  //     );
 
 
-    } catch (e) {
-      debugPrint('Send black screen message failed: $e');
-    }
+  //   } catch (e) {
+  //     debugPrint('Send black screen message failed: $e');
+  //   }
+  // }
+  Future<void> _toggleBlackScreen() async {
+      setState(() {
+        _blackScreenEnabled = !_blackScreenEnabled;
+      });
+
+      try {
+        await bind.mainSetOption(
+          key: 'toggle_black_screen',
+          value: '',
+        );
+      } catch (e) {
+        debugPrint('Send black screen message failed: $e');
+      }
   }
 
   // @override
