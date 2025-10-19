@@ -62,7 +62,7 @@ class HomePageState extends State<HomePage> {
     //_pages.add(SettingsPage());
 
      // Share screen 页面
-    _pages.add(ConnectionPage(appBarActions: [],));
+    _pages.add(ServerPage());
      // Settings 页面
     _pages.add(SettingsPage());
 
