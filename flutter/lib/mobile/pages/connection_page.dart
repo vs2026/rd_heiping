@@ -39,7 +39,7 @@ class ConnectionPage extends StatefulWidget implements PageShape {
 class _ConnectionPageState extends State<ConnectionPage> {
 
   // 在 _ConnectionPageState 类中添加：
-  bool _blackScreenEnabled = false;
+  //bool _blackScreenEnabled = false;
 
 
   /// Controller for the id input bar.
@@ -82,20 +82,20 @@ class _ConnectionPageState extends State<ConnectionPage> {
   //     debugPrint('Send black screen message failed: $e');
   //   }
   // }
-  Future<void> _toggleBlackScreen() async {
-      setState(() {
-        _blackScreenEnabled = !_blackScreenEnabled;
-      });
+  // Future<void> _toggleBlackScreen() async {
+  //     setState(() {
+  //       _blackScreenEnabled = !_blackScreenEnabled;
+  //     });
 
-      try {
-        await bind.mainSetOption(
-          key: 'toggle_black_screen',
-          value: '',
-        );
-      } catch (e) {
-        debugPrint('Send black screen message failed: $e');
-      }
-  }
+  //     try {
+  //       await bind.mainSetOption(
+  //         key: 'toggle_black_screen',
+  //         value: '',
+  //       );
+  //     } catch (e) {
+  //       debugPrint('Send black screen message failed: $e');
+  //     }
+  // }
 
   // @override
   // void initState() {
@@ -132,16 +132,16 @@ class _ConnectionPageState extends State<ConnectionPage> {
         Get.put<TextEditingController>(_idEditingController);
 
         // === 新增黑屏按钮 ===
-        widget.appBarActions.add(
-          IconButton(
-            tooltip: "切换黑屏模式",
-            icon: Icon(
-              _blackScreenEnabled ? Icons.visibility : Icons.visibility_off,
-              color: _blackScreenEnabled ? Colors.green : Colors.grey,
-            ),
-            onPressed: _toggleBlackScreen,
-          ),
-        );
+        // widget.appBarActions.add(
+        //   IconButton(
+        //     tooltip: "切换黑屏模式",
+        //     icon: Icon(
+        //       _blackScreenEnabled ? Icons.visibility : Icons.visibility_off,
+        //       color: _blackScreenEnabled ? Colors.green : Colors.grey,
+        //     ),
+        //     onPressed: _toggleBlackScreen,
+        //   ),
+        // );
     }
 
   @override
