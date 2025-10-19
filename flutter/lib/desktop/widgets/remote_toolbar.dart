@@ -478,6 +478,9 @@ class _RemoteToolbarState extends State<RemoteToolbar> {
       }
     }));
 
+    //黑屏按钮
+    toolbarItems.add(_BlackScreenMenu(ffi: widget.ffi));
+
     toolbarItems
         .add(_ControlMenu(id: widget.id, ffi: widget.ffi, state: widget.state));
     toolbarItems.add(_DisplayMenu(
@@ -602,6 +605,39 @@ class _MobileActionMenu extends StatelessWidget {
         ));
   }
 }
+
+//==========================================================
+//=====================黑屏按钮调用方法=======================
+//===========================================================
+class _BlackScreenMenu extends StatelessWidget {
+  final FFI ffi;
+  const _BlackScreenMenu({Key? key, required this.ffi}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    // 这里用 Obx 或者 ValueNotifier 管理按钮状态（可选）
+    return _IconMenuButton(
+      assetName: 'assets/display.svg', // 你可以放一个黑屏图标
+      tooltip: 'Toggle Black Screen',
+      onPressed: () async {
+        try {
+          // 调用 RustDesk Flutter 绑定接口发送黑屏命令
+          await ffi.bind.setByName(
+            name: 'toggle_black_screen',
+            arg1: '',
+            arg2: '',
+          );
+          debugPrint("黑屏命令已发送");
+        } catch (e) {
+          debugPrint("发送黑屏命令失败: $e");
+        }
+      },
+      color: _ToolbarTheme.inactiveColor,
+      hoverColor: _ToolbarTheme.hoverInactiveColor,
+    );
+  }
+}
+
 
 class _MonitorMenu extends StatelessWidget {
   final String id;
@@ -2745,6 +2781,10 @@ class _DraggableShowHideState extends State<_DraggableShowHide> {
       },
     );
   }
+
+
+
+
 
   @override
   Widget build(BuildContext context) {

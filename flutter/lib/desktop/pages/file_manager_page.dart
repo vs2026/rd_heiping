@@ -687,6 +687,7 @@ class _FileManagerViewState extends State<FileManagerView> {
               ),
             ],
           ),
+          
           Row(
             textDirection: isLocal ? TextDirection.ltr : TextDirection.rtl,
             children: [
