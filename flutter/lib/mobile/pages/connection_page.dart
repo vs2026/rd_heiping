@@ -64,56 +64,7 @@ class _ConnectionPageState extends State<ConnectionPage> {
     Get.put<IDTextEditingController>(_idController);
   }
 
-  // void _toggleBlackScreen() {
-  //   setState(() {
-  //     _blackScreenEnabled = !_blackScreenEnabled;
-  //   });
-  //   try {
-  //     // 通知远端切换黑屏状态
-  //     //bind.sendCustomMessage('{"action":"toggle_black_screen"}');
-  //     bind.setByName(
-  //       name: 'toggle_black_screen',
-  //       arg1: '',
-  //       arg2: '',
-  //     );
 
-
-  //   } catch (e) {
-  //     debugPrint('Send black screen message failed: $e');
-  //   }
-  // }
-  // Future<void> _toggleBlackScreen() async {
-  //     setState(() {
-  //       _blackScreenEnabled = !_blackScreenEnabled;
-  //     });
-
-  //     try {
-  //       await bind.mainSetOption(
-  //         key: 'toggle_black_screen',
-  //         value: '',
-  //       );
-  //     } catch (e) {
-  //       debugPrint('Send black screen message failed: $e');
-  //     }
-  // }
-
-  // @override
-  // void initState() {
-  //   super.initState();
-  //   _allPeersLoader.init(setState);
-  //   _idFocusNode.addListener(onFocusChanged);
-  //   if (_idController.text.isEmpty) {
-  //     WidgetsBinding.instance.addPostFrameCallback((_) async {
-  //       final lastRemoteId = await bind.mainGetLastRemoteId();
-  //       if (lastRemoteId != _idController.id) {
-  //         setState(() {
-  //           _idController.id = lastRemoteId;
-  //         });
-  //       }
-  //     });
-  //   }
-  //   Get.put<TextEditingController>(_idEditingController);
-  // }
     @override
     void initState() {
         super.initState();
@@ -131,17 +82,7 @@ class _ConnectionPageState extends State<ConnectionPage> {
         }
         Get.put<TextEditingController>(_idEditingController);
 
-        // === 新增黑屏按钮 ===
-        // widget.appBarActions.add(
-        //   IconButton(
-        //     tooltip: "切换黑屏模式",
-        //     icon: Icon(
-        //       _blackScreenEnabled ? Icons.visibility : Icons.visibility_off,
-        //       color: _blackScreenEnabled ? Colors.green : Colors.grey,
-        //     ),
-        //     onPressed: _toggleBlackScreen,
-        //   ),
-        // );
+
     }
 
   @override

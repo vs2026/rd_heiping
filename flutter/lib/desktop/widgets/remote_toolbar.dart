@@ -479,7 +479,7 @@ class _RemoteToolbarState extends State<RemoteToolbar> {
     }));
 
     //黑屏按钮
-    toolbarItems.add(_BlackScreenMenu(ffi: widget.ffi));
+    //toolbarItems.add(_BlackScreenMenu(ffi: widget.ffi));
 
     toolbarItems
         .add(_ControlMenu(id: widget.id, ffi: widget.ffi, state: widget.state));
