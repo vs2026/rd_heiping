@@ -141,81 +141,58 @@ class IconFont {
 }
 
 class ColorThemeExtension extends ThemeExtension<ColorThemeExtension> {
-  final Color? highlight;
-  final Color? highlightHover;
-  final Color? highlightPressed;
-  final Color? toastBg;
-  final Color? toastText;
-  final Color? errorBannerBg;
-  final Color? border;
-  final Color? border2;
-  final Color? border3;
-  final Color? divider;
-  final Color? shadow;
-  final Color? me;
-  final Color? customCardBg;
-  final Color? dragIndicator;
-  
-  // 添加toolbar相关颜色属性
-  final Color? toolbarBg;
-  final Color? toolbarIcon;
-
   const ColorThemeExtension({
-    required this.highlight,
-    required this.highlightHover,
-    required this.highlightPressed,
-    required this.toastBg,
-    required this.toastText,
-    required this.errorBannerBg,
     required this.border,
     required this.border2,
     required this.border3,
-    required this.divider,
+    required this.highlight,
+    required this.drag_indicator,
     required this.shadow,
+    required this.errorBannerBg,
     required this.me,
-    required this.customCardBg,
-    required this.dragIndicator,
-    this.toolbarBg, // 添加toolbar背景色
-    this.toolbarIcon, // 添加toolbar图标色
+    required this.toastBg,
+    required this.toastText,
+    required this.divider,
   });
 
-  // 定义静态属性
-  static const light = ColorThemeExtension(
-    highlight: Color(0xFF0066CC),
-    highlightHover: Color(0xFF0077E6),
-    highlightPressed: Color(0xFF0052A3),
-    toastBg: Color(0xFF333333),
-    toastText: Color(0xFFFFFFFF),
-    errorBannerBg: Color(0xFFFF3333),
+  final Color? border;
+  final Color? border2;
+  final Color? border3;
+  final Color? highlight;
+  final Color? drag_indicator;
+  final Color? shadow;
+  final Color? errorBannerBg;
+  final Color? me;
+  final Color? toastBg;
+  final Color? toastText;
+  final Color? divider;
+
+  static final light = ColorThemeExtension(
     border: Color(0xFFCCCCCC),
-    border2: Color(0xFFAAAAAA),
-    border3: Color(0xFF999999),
-    divider: Color(0xFFCCCCCC),
-    shadow: Color.fromARGB(40, 0, 0, 0),
-    me: Color(0xFF0066CC),
-    customCardBg: Color(0xFFEFEFF2),
-    dragIndicator: Color(0xFF666666),
-    toolbarBg: Color(0xFFCCCCCC), // 添加toolbar背景色
-    toolbarIcon: Color(0xFF000000), // 添加toolbar图标色
+    border2: Color(0xFFBBBBBB),
+    border3: Colors.black26,
+    highlight: Color(0xFFE5E5E5),
+    drag_indicator: Colors.grey[800],
+    shadow: Colors.black,
+    errorBannerBg: Color(0xFFFDEEEB),
+    me: Colors.green,
+    toastBg: Colors.black.withOpacity(0.6),
+    toastText: Colors.white,
+    divider: Colors.black38,
   );
 
-  static const dark = ColorThemeExtension(
-    highlight: Color(0xFF0066CC),
-    highlightHover: Color(0xFF0077E6),
-    highlightPressed: Color(0xFF0052A3),
-    toastBg: Color(0xFF333333),
-    toastText: Color(0xFFFFFFFF),
-    errorBannerBg: Color(0xFFFF3333),
-    border: Color(0xFF4D4D4D),
-    border2: Color(0xFF666666),
-    border3: Color(0xFF333333),
-    divider: Color(0xFF333333),
-    shadow: Color.fromARGB(40, 0, 0, 0),
-    me: Color(0xFF0066CC),
-    customCardBg: Color(0xFF1F1F1F),
-    dragIndicator: Color(0xFFAAAAAA),
-    toolbarBg: Color(0xFF333333), // 添加toolbar背景色
-    toolbarIcon: Color(0xFFFFFFFF), // 添加toolbar图标色
+  static final dark = ColorThemeExtension(
+    border: Color(0xFF555555),
+    border2: Color(0xFFE5E5E5),
+    border3: Colors.white24,
+    highlight: Color(0xFF3F3F3F),
+    drag_indicator: Colors.grey,
+    shadow: Colors.grey,
+    errorBannerBg: Color(0xFF470F2D),
+    me: Colors.greenAccent,
+    toastBg: Colors.white.withOpacity(0.6),
+    toastText: Colors.black,
+    divider: Colors.white38,
   );
 
   @override
@@ -1020,7 +997,6 @@ makeMobileActionsOverlayEntry(VoidCallback? onHide, {FFI? ffi}) {
       onHomePressed: session.inputModel.onMobileHome,
       onRecentPressed: session.inputModel.onMobileApps,
       onHidePressed: onHide,
-      session: session, // 传递会话参数
     );
   }
 

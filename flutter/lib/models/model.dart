@@ -104,7 +104,7 @@ class CachedPeerData {
   }
 }
 
-class FfiModel extends ChangeNotifier {
+class FfiModel with ChangeNotifier {
   CachedPeerData cachedPeerData = CachedPeerData();
   PeerInfo _pi = PeerInfo();
   Rect? _rect;
@@ -126,9 +126,6 @@ class FfiModel extends ChangeNotifier {
   Timer? waitForImageTimer;
   RxBool waitForFirstImage = true.obs;
   bool isRefreshing = false;
-
-  // 添加黑屏状态变量
-  RxBool isPeerBlackScreen = false.obs;
 
   Timer? timerScreenshot;
 
@@ -3040,10 +3037,9 @@ class FFI {
   var closed = false;
   var auditNote = '';
 
-
-
   /// dialogManager use late to ensure init after main page binding [globalKey]
   late final dialogManager = OverlayDialogManager();
+
   late final SessionID sessionId;
   late final ImageModel imageModel; // session
   late final FfiModel ffiModel; // session
@@ -3075,9 +3071,6 @@ class FFI {
   FFI(SessionID? sId) {
     sessionId = sId ?? (isDesktop ? Uuid().v4obj() : _constSessionId);
     imageModel = ImageModel(WeakReference(this));
-
-
-
     ffiModel = FfiModel(WeakReference(this));
     cursorModel = CursorModel(WeakReference(this));
     canvasModel = CanvasModel(WeakReference(this));
