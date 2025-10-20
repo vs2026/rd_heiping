@@ -127,6 +127,9 @@ class FfiModel extends ChangeNotifier {
   RxBool waitForFirstImage = true.obs;
   bool isRefreshing = false;
 
+  // 添加黑屏状态变量
+  RxBool isPeerBlackScreen = false.obs;
+
   Timer? timerScreenshot;
 
   Rect? get rect => _rect;

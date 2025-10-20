@@ -464,7 +464,7 @@ class _RemoteToolbarState extends State<RemoteToolbar> {
     toolbarItems.add(_PinMenu(state: widget.state));
     if (!isWebDesktop) {
       toolbarItems.add(_MobileActionMenu(ffi: widget.ffi));
-      toolbarItems.add(_MobileBlackScreenMenu(ffi: widget.ffi));
+      // toolbarItems.add(_MobileBlackScreenMenu(ffi: widget.ffi)); // 移除对不存在类的引用
     }
 
     toolbarItems.add(Obx(() {
@@ -565,6 +565,494 @@ class _RemoteToolbarState extends State<RemoteToolbar> {
 class _PinMenu extends StatelessWidget {
   final ToolbarState state;
   const _PinMenu({Key? key, required this.state}) : super(key: key);
+
+  @override
+}
+
+class _MobileActionMenu extends StatelessWidget {
+  final FFI ffi;
+  const _MobileActionMenu({Key? key, required this.ffi}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return MenuAnchor(
+      builder: (context, controller, child) {
+        return IconButton(
+          onPressed: () {
+            controller.open();
+          },
+          icon: Icon(Icons.menu),
+        );
+      },
+      menuChildren: [
+        MenuEntryButton<String>(
+          childBuilder: (TextStyle? style) => Text(
+            translate('Insert Lock'),
+            style: style,
+          ),
+          proc: () {
+            bind.sessionLockScreen(sessionId: ffi.sessionId);
+          },
+        ),
+        MenuEntryButton<String>(
+          childBuilder: (TextStyle? style) => Text(
+            translate("Insert Ctrl + Alt + Del"),
+            style: style,
+          ),
+          proc: () {
+            bind.sessionCtrlAltDel(sessionId: ffi.sessionId);
+          },
+        ),
+      ],
+    );
+  }
+}
+
+// 添加黑屏控制按钮
+class _MobileBlackScreenMenu extends StatelessWidget {
+  final FFI ffi;
+  const _MobileBlackScreenMenu({Key? key, required this.ffi}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return MenuAnchor(
+      builder: (context, controller, child) {
+        return IconButton(
+          onPressed: () {
+            controller.open();
+          },
+          icon: Icon(Icons.menu),
+        );
+      },
+      menuChildren: [
+        MenuEntryButton<String>(
+          childBuilder: (TextStyle? style) => Text(
+            translate('Insert Lock'),
+            style: style,
+          ),
+          proc: () {
+            bind.sessionLockScreen(sessionId: ffi.sessionId);
+          },
+        ),
+        MenuEntryButton<String>(
+          childBuilder: (TextStyle? style) => Text(
+            translate("Insert Ctrl + Alt + Del"),
+            style: style,
+          ),
+          proc: () {
+            bind.sessionCtrlAltDel(sessionId: ffi.sessionId);
+          },
+        ),
+      ],
+    );
+  }
+}
+
+class _MonitorMenu extends StatelessWidget {
+  final String id;
+  final FFI ffi;
+  final Function(VoidCallback) setRemoteState;
+
+  const _MonitorMenu(
+      {Key? key,
+      required this.id,
+      required this.ffi,
+      required this.setRemoteState})
+      : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return MenuAnchor(
+      builder: (context, controller, child) {
+        return IconButton(
+          onPressed: () {
+            controller.open();
+          },
+          icon: Icon(Icons.monitor),
+        );
+      },
+      menuChildren: [
+        Obx(() {
+          final List<Widget> children = [];
+          final pi = ffi.ffiModel.pi;
+          for (int i = 0; i < pi.displaysCount.value; i++) {
+            children.add(
+              MenuEntryButton<String>(
+                childBuilder: (TextStyle? style) => Text(
+                  translate('Monitor ${i + 1}'),
+                  style: style,
+                ),
+                proc: () {
+                  bind.sessionSetDisplay(sessionId: ffi.sessionId, value: i);
+                  setRemoteState(() {
+                    ffi.canvasModel.updateViewStyle();
+                  });
+                },
+              ),
+            );
+          }
+          return Column(children: children);
+        }),
+      ],
+    );
+  }
+}
+
+class _ControlMenu extends StatelessWidget {
+  final String id;
+  final FFI ffi;
+  final ToolbarState state;
+
+  const _ControlMenu(
+      {Key? key,
+      required this.id,
+      required this.ffi,
+      required this.state})
+      : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return MenuAnchor(
+      builder: (context, controller, child) {
+        return IconButton(
+          onPressed: () {
+            controller.open();
+          },
+          icon: Icon(Icons.control_point),
+        );
+      },
+      menuChildren: [
+        RemoteMenuEntry.viewStyle(
+          id,
+          ffi,
+          EdgeInsets.zero,
+          dismissCallback: () {
+            controller.close();
+          },
+        ),
+        RemoteMenuEntry.showRemoteCursor(
+          id,
+          ffi.sessionId,
+          EdgeInsets.zero,
+          dismissCallback: () {
+            controller.close();
+          },
+        ),
+        RemoteMenuEntry.disableClipboard(
+          ffi.sessionId,
+          EdgeInsets.zero,
+          dismissCallback: () {
+            controller.close();
+          },
+        ),
+      ],
+    );
+  }
+}
+
+class _DisplayMenu extends StatelessWidget {
+  final String id;
+  final FFI ffi;
+  final ToolbarState state;
+  final Function(bool) setFullscreen;
+
+  const _DisplayMenu(
+      {Key? key,
+      required this.id,
+      required this.ffi,
+      required this.state,
+      required this.setFullscreen})
+      : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return MenuAnchor(
+      builder: (context, controller, child) {
+        return IconButton(
+          onPressed: () {
+            controller.open();
+          },
+          icon: Icon(Icons.display_settings),
+        );
+      },
+      menuChildren: [
+        MenuEntrySwitch<String>(
+          switchType: SwitchType.scheckbox,
+          text: translate('Fullscreen'),
+          getter: () async {
+            return stateGlobal.fullscreen.value;
+          },
+          setter: (bool v) async {
+            setFullscreen(v);
+          },
+          padding: EdgeInsets.zero,
+          dismissOnClicked: true,
+          dismissCallback: () {
+            controller.close();
+          },
+        ),
+        RemoteMenuEntry.createSwitchMenuEntry(
+          ffi.sessionId,
+          'Disable remote cursor',
+          'disable-remote-cursor',
+          EdgeInsets.zero,
+          true,
+          dismissCallback: () {
+            controller.close();
+          },
+        ),
+      ],
+    );
+  }
+}
+
+class _KeyboardMenu extends StatelessWidget {
+  final String id;
+  final FFI ffi;
+
+  const _KeyboardMenu(
+      {Key? key,
+      required this.id,
+      required this.ffi})
+      : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return MenuAnchor(
+      builder: (context, controller, child) {
+        return IconButton(
+          onPressed: () {
+            controller.open();
+          },
+          icon: Icon(Icons.keyboard),
+        );
+      },
+      menuChildren: [
+        MenuEntryButton<String>(
+          childBuilder: (TextStyle? style) => Text(
+            translate('Insert Lock'),
+            style: style,
+          ),
+          proc: () {
+            bind.sessionLockScreen(sessionId: ffi.sessionId);
+          },
+        ),
+        MenuEntryButton<String>(
+          childBuilder: (TextStyle? style) => Text(
+            translate("Insert Ctrl + Alt + Del"),
+            style: style,
+          ),
+          proc: () {
+            bind.sessionCtrlAltDel(sessionId: ffi.sessionId);
+          },
+        ),
+      ],
+    );
+  }
+}
+
+class _ChatMenu extends StatelessWidget {
+  final String id;
+  final FFI ffi;
+
+  const _ChatMenu(
+      {Key? key,
+      required this.id,
+      required this.ffi})
+      : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return MenuAnchor(
+      builder: (context, controller, child) {
+        return IconButton(
+          onPressed: () {
+            controller.open();
+          },
+          icon: Icon(Icons.chat),
+        );
+      },
+      menuChildren: [
+        MenuEntryButton<String>(
+          childBuilder: (TextStyle? style) => Text(
+            translate('Insert Lock'),
+            style: style,
+          ),
+          proc: () {
+            bind.sessionLockScreen(sessionId: ffi.sessionId);
+          },
+        ),
+        MenuEntryButton<String>(
+          childBuilder: (TextStyle? style) => Text(
+            translate("Insert Ctrl + Alt + Del"),
+            style: style,
+          ),
+          proc: () {
+            bind.sessionCtrlAltDel(sessionId: ffi.sessionId);
+          },
+        ),
+      ],
+    );
+  }
+}
+
+class _VoiceCallMenu extends StatelessWidget {
+  final String id;
+  final FFI ffi;
+
+  const _VoiceCallMenu(
+      {Key? key,
+      required this.id,
+      required this.ffi})
+      : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return MenuAnchor(
+      builder: (context, controller, child) {
+        return IconButton(
+          onPressed: () {
+            controller.open();
+          },
+          icon: Icon(Icons.call),
+        );
+      },
+      menuChildren: [
+        MenuEntryButton<String>(
+          childBuilder: (TextStyle? style) => Text(
+            translate('Insert Lock'),
+            style: style,
+          ),
+          proc: () {
+            bind.sessionLockScreen(sessionId: ffi.sessionId);
+          },
+        ),
+        MenuEntryButton<String>(
+          childBuilder: (TextStyle? style) => Text(
+            translate("Insert Ctrl + Alt + Del"),
+            style: style,
+          ),
+          proc: () {
+            bind.sessionCtrlAltDel(sessionId: ffi.sessionId);
+          },
+        ),
+      ],
+    );
+  }
+}
+
+class _RecordMenu extends StatelessWidget {
+  const _RecordMenu({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return MenuAnchor(
+      builder: (context, controller, child) {
+        return IconButton(
+          onPressed: () {
+            controller.open();
+          },
+          icon: Icon(Icons.record_voice_over),
+        );
+      },
+      menuChildren: [
+        MenuEntryButton<String>(
+          childBuilder: (TextStyle? style) => Text(
+            translate('Insert Lock'),
+            style: style,
+          ),
+          proc: () {
+            bind.sessionLockScreen(sessionId: ffi.sessionId);
+          },
+        ),
+        MenuEntryButton<String>(
+          childBuilder: (TextStyle? style) => Text(
+            translate("Insert Ctrl + Alt + Del"),
+            style: style,
+          ),
+          proc: () {
+            bind.sessionCtrlAltDel(sessionId: ffi.sessionId);
+          },
+        ),
+      ],
+    );
+  }
+}
+
+class _CloseMenu extends StatelessWidget {
+  final String id;
+  final FFI ffi;
+
+  const _CloseMenu(
+      {Key? key,
+      required this.id,
+      required this.ffi})
+      : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return MenuAnchor(
+      builder: (context, controller, child) {
+        return IconButton(
+          onPressed: () {
+            controller.open();
+          },
+          icon: Icon(Icons.close),
+        );
+      },
+      menuChildren: [
+        MenuEntryButton<String>(
+          childBuilder: (TextStyle? style) => Text(
+            translate('Insert Lock'),
+            style: style,
+          ),
+          proc: () {
+            bind.sessionLockScreen(sessionId: ffi.sessionId);
+          },
+        ),
+        MenuEntryButton<String>(
+          childBuilder: (TextStyle? style) => Text(
+            translate("Insert Ctrl + Alt + Del"),
+            style: style,
+          ),
+          proc: () {
+            bind.sessionCtrlAltDel(sessionId: ffi.sessionId);
+          },
+        ),
+      ],
+    );
+  }
+}
+
+class _DraggableShowHide extends StatefulWidget {
+  final String id;
+  final SessionID sessionId;
+  final RxBool dragging;
+  final RxDouble fractionX;
+  final ToolbarState toolbarState;
+  final Function(bool) setFullscreen;
+  final Function() setMinimize;
+  final BorderRadius borderRadius;
+
+  const _DraggableShowHide(
+      {Key? key,
+      required this.id,
+      required this.sessionId,
+      required this.dragging,
+      required this.fractionX,
+      required this.toolbarState,
+      required this.setFullscreen,
+      required this.setMinimize,
+      required this.borderRadius})
+      : super(key: key);
+
+  @override
+  State<_DraggableShowHide> createState() => _DraggableShowHideState();
+}
+
+class _DraggableShowHideState extends State<_DraggableShowHide> {
+  late Offset _dragStartOffset;
+  late Offset _dragStartFraction;
 
   @override
   Widget build(BuildContext context) {
@@ -1604,6 +2092,29 @@ class _RectValueThumbShape extends SliderComponentShape {
 class _ResolutionsMenu extends StatefulWidget {
   final String id;
   final FFI ffi;
+  final Rect? rect;
+  final Function(VoidCallback) setRemoteState;
+
+  const _ResolutionsMenu(
+      {Key? key,
+      required this.id,
+      required this.ffi,
+      required this.rect,
+      required this.setRemoteState})
+      : super(key: key);
+
+  @override
+  State<_ResolutionsMenu> createState() => _ResolutionsMenuState();
+}
+
+class _ResolutionsMenuState extends State<_ResolutionsMenu> {
+  late final ffiModel = widget.ffi.ffiModel;
+  late final pi = ffiModel.pi;
+  late final isFileTransfer = ffiModel.parent.target?.connType == ConnType.fileTransfer;
+  late final isPortForward = ffiModel.parent.target?.connType == ConnType.portForward;
+  late final isRdp = ffiModel.parent.target?.connType == ConnType.rdp;
+  final String id;
+  final FFI ffi;
   final ScreenAdjustor screenAdjustor;
 
   _ResolutionsMenu({
@@ -1845,11 +2356,11 @@ class _ResolutionsMenuState extends State<_ResolutionsMenu> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            if (isFileTransfer)
+            if (ffiModel.parent.target?.connType == ConnType.fileTransfer)
               _FileTransferToolbar(ffi: widget.ffi)
-            else if (isPortForward)
+            else if (ffiModel.parent.target?.connType == ConnType.portForward)
               _PortForwardToolbar(ffi: widget.ffi)
-            else if (isRdp)
+            else if (ffiModel.parent.target?.connType == ConnType.rdp)
               _RdpToolbar(ffi: widget.ffi)
             else
               Text('${translate('resolution_custom_tip')} '),

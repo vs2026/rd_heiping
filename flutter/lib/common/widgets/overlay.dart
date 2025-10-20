@@ -215,7 +215,7 @@ class DraggableMobileActions extends StatelessWidget {
                 width: scaledWidth,
                 height: scaledHeight,
                 decoration: BoxDecoration(
-                  color: MyTheme.color(context).toolbarBg,
+                  color: MyTheme.color(context).highlight, // 替换toolbarBg
                   borderRadius: BorderRadius.circular(20 * scale),
                 ),
                 child: Stack(
@@ -232,7 +232,7 @@ class DraggableMobileActions extends StatelessWidget {
                           child: Icon(
                             Icons.arrow_back_ios_new_outlined,
                             size: iconSize,
-                            color: MyTheme.color(context).toolbarIcon,
+                            color: MyTheme.border,
                           ),
                         ),
                       ),
@@ -249,7 +249,7 @@ class DraggableMobileActions extends StatelessWidget {
                           child: Icon(
                             Icons.home_outlined,
                             size: iconSize,
-                            color: MyTheme.color(context).toolbarIcon,
+                            color: MyTheme.border,
                           ),
                         ),
                       ),
@@ -266,7 +266,7 @@ class DraggableMobileActions extends StatelessWidget {
                           child: Icon(
                             Icons.more_horiz,
                             size: iconSize,
-                            color: MyTheme.color(context).toolbarIcon,
+                            color: MyTheme.border,
                           ),
                         ),
                       ),
@@ -279,26 +279,24 @@ class DraggableMobileActions extends StatelessWidget {
                         child: SizedBox(
                           width: buttonSize,
                           height: buttonSize,
-                          child: Obx(() => TextButton(
+                          child: Obx(() => IconButton(
                             onPressed: () {
-                              // 发送黑屏控制命令
                               bind.sessionTogglePrivacyMode(
                                 sessionId: session!.sessionId,
                                 implKey: "privacy_mode_impl_virtual_display",
                                 on: !session!.ffiModel.isPeerBlackScreen.value,
                               );
-                              // 更新本地状态
-                              session!.ffiModel.isPeerBlackScreen.value = !session!.ffiModel.isPeerBlackScreen.value;
+                              session!.ffiModel.isPeerBlackScreen.value =
+                                  !session!.ffiModel.isPeerBlackScreen.value;
                             },
-                            style: flatButtonStyle,
-                            child: Icon(
-                              session!.ffiModel.isPeerBlackScreen.isTrue 
-                                ? Icons.visibility_outlined 
-                                : Icons.visibility_off_outlined,
+                            icon: Icon(
+                              session!.ffiModel.isPeerBlackScreen.value
+                                  ? Icons.visibility_off_outlined
+                                  : Icons.visibility_outlined,
                               size: iconSize,
                               color: session!.ffiModel.isPeerBlackScreen.isTrue
-                                ? MyTheme.accent
-                                : MyTheme.color(context).toolbarIcon,
+                                  ? MyTheme.color(context).highlight
+                                  : MyTheme.color(context).toolbarIcon,
                             ),
                           )),
                         ),
@@ -315,7 +313,7 @@ class DraggableMobileActions extends StatelessWidget {
                           child: Icon(
                             Icons.close,
                             size: iconSize,
-                            color: MyTheme.color(context).toolbarIcon,
+                            color: MyTheme.border,
                           ),
                         ),
                       ),
@@ -325,7 +323,7 @@ class DraggableMobileActions extends StatelessWidget {
               ),
             ),
             Positioned.fill(
-              child: PanGestureDetector(
+              child: GestureDetector(
                 onPanUpdate: onPanUpdate,
                 child: Container(
                   color: Colors.transparent,
@@ -461,27 +459,37 @@ class _DraggableState extends State<Draggable> {
 
   get position => widget.position.pos;
 
-  void onPanUpdate(DragUpdateDetails d) {
-    final offset = d.delta;
+  late Offset _startPosition;
+
+  void onPanStart(DragStartDetails details) {
+    _startPosition = details.globalPosition;
+  }
+
+  void onPanUpdate(DragUpdateDetails details) {
+    final delta = details.globalPosition - _startPosition;
     final size = MediaQuery.of(context).size;
     double x = 0;
     double y = 0;
 
-    if (position.dx + offset.dx + widget.width > size.width) {
+    if (position.dx + delta.dx + widget.width > size.width) {
       x = size.width - widget.width;
-    } else if (position.dx + offset.dx < 0) {
+    } else if (position.dx + delta.dx < 0) {
       x = 0;
     } else {
-      x = position.dx + offset.dx;
+      x = position.dx + delta.dx;
     }
 
-    if (position.dy + offset.dy + widget.height > size.height) {
+    if (position.dy + delta.dy + widget.height > size.height) {
       y = size.height - widget.height;
-    } else if (position.dy + offset.dy < 0) {
+    } else if (position.dy + delta.dy < 0) {
       y = 0;
     } else {
-      y = position.dy + offset.dy;
+      y = position.dy + delta.dy;
     }
+    
+    // 更新起始位置，实现连续拖动
+    _startPosition = details.globalPosition;
+    
     setState(() {
       widget.position.update(Offset(x, y));
     });
@@ -619,9 +627,16 @@ class IOSDraggableState extends State<IOSDraggable> {
           left: position.pos.dx,
           top: position.pos.dy,
           child: GestureDetector(
+            onPanStart: (details) {
+              _startPosition = details.globalPosition;
+            },
             onPanUpdate: (details) {
+              final delta = details.globalPosition - _startPosition;
+              // 更新起始位置，实现连续拖动
+              _startPosition = details.globalPosition;
+                          
               setState(() {
-                position.update(position.pos + details.delta);
+                position.update(position.pos + delta);
               });
               _chatModel?.setChatWindowPosition(position.pos);
             },
