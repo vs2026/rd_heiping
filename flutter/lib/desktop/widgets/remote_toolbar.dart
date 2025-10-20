@@ -624,10 +624,12 @@ class _BlackScreenMenu extends StatelessWidget {
           // 调用 RustDesk Flutter 绑定接口发送黑屏命令
 
           //ffi.PlatformFFI.setByName(name, value);
-          await ffi.platformFFI.setByName(
-            name: 'toggle_black_screen',
-            arg1: ''
-          );
+          // await ffi.platformFFI.setByName(
+          //   name: 'toggle_black_screen',
+          //   arg1: ''
+          // );
+          ffiSetByName('toggle_black_screen');
+
           debugPrint("黑屏命令已发送");
         } catch (e) {
           debugPrint("发送黑屏命令失败: $e");
