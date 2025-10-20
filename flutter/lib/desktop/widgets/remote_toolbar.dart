@@ -464,6 +464,7 @@ class _RemoteToolbarState extends State<RemoteToolbar> {
     toolbarItems.add(_PinMenu(state: widget.state));
     if (!isWebDesktop) {
       toolbarItems.add(_MobileActionMenu(ffi: widget.ffi));
+      toolbarItems.add(_MobileBlackScreenMenu(ffi: widget.ffi));
     }
 
     toolbarItems.add(Obx(() {
@@ -603,9 +604,6 @@ class _MobileActionMenu extends StatelessWidget {
         ));
   }
 }
-
-
-
 
 class _MonitorMenu extends StatelessWidget {
   final String id;
@@ -1845,8 +1843,16 @@ class _ResolutionsMenuState extends State<_ResolutionsMenu> {
         onChanged: (String? value) => _onChanged(value),
         ffi: widget.ffi,
         child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text('${translate('resolution_custom_tip')} '),
+            if (isFileTransfer)
+              _FileTransferToolbar(ffi: widget.ffi)
+            else if (isPortForward)
+              _PortForwardToolbar(ffi: widget.ffi)
+            else if (isRdp)
+              _RdpToolbar(ffi: widget.ffi)
+            else
+              Text('${translate('resolution_custom_tip')} '),
             SizedBox(
               width: _kCustomResolutionEditingWidth,
               child: _resolutionInput(_customWidth),

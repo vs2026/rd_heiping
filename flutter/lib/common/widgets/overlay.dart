@@ -170,79 +170,172 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
 
 /// floating buttons of back/home/recent actions for android
 class DraggableMobileActions extends StatelessWidget {
-  DraggableMobileActions(
-      {this.onBackPressed,
-      this.onRecentPressed,
-      this.onHomePressed,
-      this.onHidePressed,
-      required this.position,
-      required this.width,
-      required this.height,
-      required this.scale});
-
   final double scale;
   final DraggableKeyPosition position;
   final double width;
   final double height;
-  final VoidCallback? onBackPressed;
-  final VoidCallback? onHomePressed;
-  final VoidCallback? onRecentPressed;
+  final VoidCallback onBackPressed;
+  final VoidCallback onHomePressed;
+  final VoidCallback onRecentPressed;
   final VoidCallback? onHidePressed;
+  final FFI? session; // 添加会话参数
+
+  const DraggableMobileActions({
+    Key? key,
+    required this.scale,
+    required this.position,
+    required this.width,
+    required this.height,
+    required this.onBackPressed,
+    required this.onHomePressed,
+    required this.onRecentPressed,
+    this.onHidePressed,
+    this.session,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final scaledWidth = width * scale;
+    final scaledHeight = height * scale;
+    final buttonSize = 40.0 * scale;
+    final iconSize = 20.0 * scale;
+    final fontSize = 12.0 * scale;
+
     return Draggable(
-        position: position,
-        width: scale * width,
-        height: scale * height,
-        builder: (_, onPanUpdate) {
-          return GestureDetector(
-              onPanUpdate: onPanUpdate,
-              child: Card(
-                  color: Colors.transparent,
-                  shadowColor: Colors.transparent,
-                  child: Container(
-                    decoration: BoxDecoration(
-                        color: MyTheme.accent.withOpacity(0.4),
-                        borderRadius:
-                            BorderRadius.all(Radius.circular(15 * scale))),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: [
-                        IconButton(
-                            color: Colors.white,
-                            onPressed: onBackPressed,
-                            splashRadius: kDesktopIconButtonSplashRadius,
-                            icon: const Icon(Icons.arrow_back),
-                            iconSize: 24 * scale),
-                        IconButton(
-                            color: Colors.white,
-                            onPressed: onHomePressed,
-                            splashRadius: kDesktopIconButtonSplashRadius,
-                            icon: const Icon(Icons.home),
-                            iconSize: 24 * scale),
-                        IconButton(
-                            color: Colors.white,
-                            onPressed: onRecentPressed,
-                            splashRadius: kDesktopIconButtonSplashRadius,
-                            icon: const Icon(Icons.more_horiz),
-                            iconSize: 24 * scale),
-                        const VerticalDivider(
-                          width: 0,
-                          thickness: 2,
-                          indent: 10,
-                          endIndent: 10,
+      position: position,
+      width: scaledWidth,
+      height: scaledHeight,
+      builder: (context, onPanUpdate) {
+        return Stack(
+          children: [
+            Positioned(
+              left: 0,
+              top: 0,
+              child: Container(
+                width: scaledWidth,
+                height: scaledHeight,
+                decoration: BoxDecoration(
+                  color: MyTheme.color(context).toolbarBg,
+                  borderRadius: BorderRadius.circular(20 * scale),
+                ),
+                child: Stack(
+                  children: [
+                    Positioned(
+                      left: 5 * scale,
+                      top: (scaledHeight - buttonSize) / 2,
+                      child: SizedBox(
+                        width: buttonSize,
+                        height: buttonSize,
+                        child: TextButton(
+                          onPressed: onBackPressed,
+                          style: flatButtonStyle,
+                          child: Icon(
+                            Icons.arrow_back_ios_new_outlined,
+                            size: iconSize,
+                            color: MyTheme.color(context).toolbarIcon,
+                          ),
                         ),
-                        IconButton(
-                            color: Colors.white,
-                            onPressed: onHidePressed,
-                            splashRadius: kDesktopIconButtonSplashRadius,
-                            icon: const Icon(Icons.keyboard_arrow_down),
-                            iconSize: 24 * scale),
-                      ],
+                      ),
                     ),
-                  )));
-        });
+                    Positioned(
+                      left: (scaledWidth - 120 * scale) / 2,
+                      top: (scaledHeight - buttonSize) / 2,
+                      child: SizedBox(
+                        width: buttonSize,
+                        height: buttonSize,
+                        child: TextButton(
+                          onPressed: onHomePressed,
+                          style: flatButtonStyle,
+                          child: Icon(
+                            Icons.home_outlined,
+                            size: iconSize,
+                            color: MyTheme.color(context).toolbarIcon,
+                          ),
+                        ),
+                      ),
+                    ),
+                    Positioned(
+                      right: 90 * scale,
+                      top: (scaledHeight - buttonSize) / 2,
+                      child: SizedBox(
+                        width: buttonSize,
+                        height: buttonSize,
+                        child: TextButton(
+                          onPressed: onRecentPressed,
+                          style: flatButtonStyle,
+                          child: Icon(
+                            Icons.more_horiz,
+                            size: iconSize,
+                            color: MyTheme.color(context).toolbarIcon,
+                          ),
+                        ),
+                      ),
+                    ),
+                    // 添加黑屏控制按钮
+                    if (session != null && session!.ffiModel.isPeerAndroid)
+                      Positioned(
+                        right: 45 * scale,
+                        top: (scaledHeight - buttonSize) / 2,
+                        child: SizedBox(
+                          width: buttonSize,
+                          height: buttonSize,
+                          child: Obx(() => TextButton(
+                            onPressed: () {
+                              // 发送黑屏控制命令
+                              bind.sessionTogglePrivacyMode(
+                                sessionId: session!.sessionId,
+                                implKey: "privacy_mode_impl_virtual_display",
+                                on: !session!.ffiModel.isPeerBlackScreen.value,
+                              );
+                              // 更新本地状态
+                              session!.ffiModel.isPeerBlackScreen.value = !session!.ffiModel.isPeerBlackScreen.value;
+                            },
+                            style: flatButtonStyle,
+                            child: Icon(
+                              session!.ffiModel.isPeerBlackScreen.isTrue 
+                                ? Icons.visibility_outlined 
+                                : Icons.visibility_off_outlined,
+                              size: iconSize,
+                              color: session!.ffiModel.isPeerBlackScreen.isTrue
+                                ? MyTheme.accent
+                                : MyTheme.color(context).toolbarIcon,
+                            ),
+                          )),
+                        ),
+                      ),
+                    Positioned(
+                      right: 5 * scale,
+                      top: (scaledHeight - buttonSize) / 2,
+                      child: SizedBox(
+                        width: buttonSize,
+                        height: buttonSize,
+                        child: TextButton(
+                          onPressed: onHidePressed,
+                          style: flatButtonStyle,
+                          child: Icon(
+                            Icons.close,
+                            size: iconSize,
+                            color: MyTheme.color(context).toolbarIcon,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            Positioned.fill(
+              child: PanGestureDetector(
+                onPanUpdate: onPanUpdate,
+                child: Container(
+                  color: Colors.transparent,
+                ),
+              ),
+            )
+          ],
+        );
+      },
+    );
   }
 }
 

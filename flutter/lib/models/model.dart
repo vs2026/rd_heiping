@@ -104,7 +104,7 @@ class CachedPeerData {
   }
 }
 
-class FfiModel with ChangeNotifier {
+class FfiModel extends ChangeNotifier {
   CachedPeerData cachedPeerData = CachedPeerData();
   PeerInfo _pi = PeerInfo();
   Rect? _rect;
