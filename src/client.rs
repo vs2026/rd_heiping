@@ -21,7 +21,7 @@ use std::{
     ops::Deref,
     str::FromStr,
     sync::{
-        mpsc::{self},
+        mpsc::{self, RecvTimeoutError},
         Arc, Mutex, RwLock,
     },
 };

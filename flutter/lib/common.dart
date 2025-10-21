@@ -988,6 +988,7 @@ makeMobileActionsOverlayEntry(VoidCallback? onHide, {FFI? ffi}) {
     } else {
       draggablePositions.mobileActions.tryAdjust(overlayW, overlayH, scale);
     }
+    
     return DraggableMobileActions(
       scale: scale,
       position: draggablePositions.mobileActions,
