@@ -625,10 +625,6 @@ message TogglePrivacyMode {
   bool on = 2;
 }
 
-message ToggleBlackScreen {
-  bool on = 1;
-}
-
 message PermissionInfo {
   enum Permission {
     Keyboard = 0;
@@ -861,7 +857,6 @@ message Misc {
     DisplayResolution change_display_resolution = 36;
     MessageQuery message_query = 37;
     int32 follow_current_display = 38;
-    ToggleBlackScreen toggle_black_screen = 39;
   }
 }
 

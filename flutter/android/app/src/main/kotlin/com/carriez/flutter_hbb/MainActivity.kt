@@ -41,9 +41,6 @@ class MainActivity : FlutterActivity() {
         private var _rdClipboardManager: RdClipboardManager? = null
         val rdClipboardManager: RdClipboardManager?
             get() = _rdClipboardManager;
-        private var _blackScreenOverlayManager: BlackScreenOverlayManager? = null
-        val blackScreenOverlayManager: BlackScreenOverlayManager?
-            get() = _blackScreenOverlayManager;
     }
 
     private val channelTag = "mChannel"
@@ -99,9 +96,6 @@ class MainActivity : FlutterActivity() {
             _rdClipboardManager = RdClipboardManager(getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager)
             FFI.setClipboardManager(_rdClipboardManager!!)
         }
-        if (_blackScreenOverlayManager == null) {
-            _blackScreenOverlayManager = BlackScreenOverlayManager(this)
-        }
     }
 
     override fun onDestroy() {
@@ -109,8 +103,6 @@ class MainActivity : FlutterActivity() {
         mainService?.let {
             unbindService(serviceConnection)
         }
-        _blackScreenOverlayManager?.release()
-        _blackScreenOverlayManager = null
         super.onDestroy()
     }
 
@@ -274,12 +266,6 @@ class MainActivity : FlutterActivity() {
                 }
                 "on_voice_call_closed" -> {
                     onVoiceCallClosed()
-                }
-                "toggle_black_screen" -> {
-                    mainService?.toggleBlackScreen() ?: let {
-                        _blackScreenOverlayManager?.toggle()
-                    }
-                    result.success(true)
                 }
                 else -> {
                     result.error("-1", "No such method", null)

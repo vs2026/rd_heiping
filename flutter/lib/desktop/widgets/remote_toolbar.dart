@@ -2173,10 +2173,6 @@ class _KeyboardMenu extends StatelessWidget {
           child: Text(translate('Power')),
           onPressed: () => ffi.inputModel.onMobilePower(),
           ffi: ffi),
-      MenuButton(
-          child: Text(translate('Black screen')),
-          onPressed: () => ffi.inputModel.onMobileBlackScreen(),
-          ffi: ffi),
     ];
   }
 }

@@ -375,17 +375,6 @@ impl<T: InvokeUiSession> Session<T> {
         self.send(Data::Message(msg_out));
     }
 
-    pub fn toggle_black_screen(&self, on: bool) {
-        let mut misc = Misc::new();
-        misc.set_toggle_black_screen(ToggleBlackScreen {
-            on,
-            ..Default::default()
-        });
-        let mut msg_out = Message::new();
-        msg_out.set_misc(misc);
-        self.send(Data::Message(msg_out));
-    }
-
     pub fn get_toggle_option(&self, name: String) -> bool {
         self.lc.read().unwrap().get_toggle_option(&name)
     }

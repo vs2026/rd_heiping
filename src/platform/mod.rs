@@ -107,15 +107,6 @@ impl WakeLock {
     }
 }
 
-#[cfg(target_os = "android")]
-pub fn toggle_black_screen(on: bool) {
-    use scrap::android::call_main_service_set_by_name;
-    let state = if on { "on" } else { "off" };
-    if let Err(e) = call_main_service_set_by_name("toggle_black_screen", Some(state), None) {
-        hbb_common::log::error!("Failed to toggle black screen: {}", e);
-    }
-}
-
 #[cfg(not(target_os = "ios"))]
 pub fn get_wakelock(_display: bool) -> WakeLock {
     hbb_common::log::info!("new wakelock, require display on: {_display}");

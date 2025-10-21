@@ -286,9 +286,5 @@ class PlatformFFI {
     invokeMethod(AndroidChannel.kSyncAppDirConfigPath, _dir);
   }
 
-  void toggleBlackScreen() {
-    invokeMethod(AndroidChannel.kToggleBlackScreen);
-  }
-
   void setFullscreenCallback(void Function(bool) fun) {}
 }
