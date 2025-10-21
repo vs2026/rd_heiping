@@ -997,6 +997,11 @@ makeMobileActionsOverlayEntry(VoidCallback? onHide, {FFI? ffi}) {
       onHomePressed: session.inputModel.onMobileHome,
       onRecentPressed: session.inputModel.onMobileApps,
       onHidePressed: onHide,
+      onPrivacyPressed: () {
+        if (isAndroid) {
+          gFFI.invokeMethod("toggle_privacy_overlay");
+        }
+      },
     );
   }
 
