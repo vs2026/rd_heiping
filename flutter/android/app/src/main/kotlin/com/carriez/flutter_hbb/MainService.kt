@@ -113,6 +113,10 @@ class MainService : Service() {
     @Keep
     fun rustSetByName(name: String, arg1: String, arg2: String) {
         when (name) {
+            "toggle_privacy_screen" -> {
+                // Notify Flutter to toggle privacy screen overlay
+                MainActivity.flutterMethodChannel?.invokeMethod("toggle_privacy_screen", null)
+            }
             "add_connection" -> {
                 try {
                     val jsonObject = JSONObject(arg1)
@@ -254,7 +258,8 @@ class MainService : Service() {
         createForegroundNotification()
 
 
-        // 馃毇 闃叉鍚姩鎮诞绐楁湇鍔?        //stopService(Intent(this, FloatingWindowService::class.java))
+        // 🚫 防止启动悬浮窗服务
+        //stopService(Intent(this, FloatingWindowService::class.java))
         
     }
 

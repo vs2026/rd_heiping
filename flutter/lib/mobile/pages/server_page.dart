@@ -10,6 +10,7 @@ import 'package:provider/provider.dart';
 
 import '../../common.dart';
 import '../../common/widgets/dialog.dart';
+import '../../common/widgets/overlay.dart';
 import '../../consts.dart';
 import '../../models/platform_model.dart';
 import '../../models/server_model.dart';
@@ -196,7 +197,9 @@ class _ServerPageState extends State<ServerPage> {
     return ChangeNotifierProvider.value(
         value: gFFI.serverModel,
         child: Consumer<ServerModel>(
-            builder: (context, serverModel, child) => SingleChildScrollView(
+            builder: (context, serverModel, child) => Stack(
+              children: [
+                SingleChildScrollView(
                   controller: gFFI.serverModel.controller,
                   child: Center(
                     child: Column(
@@ -212,7 +215,10 @@ class _ServerPageState extends State<ServerPage> {
                       ],
                     ),
                   ),
-                )));
+                ),
+                PrivacyScreenOverlay(isEnabled: serverModel.privacyScreenEnabled),
+              ],
+            )));
   }
 }
 
@@ -906,6 +912,11 @@ void androidChannelInit() {
             if (gFFI.serverModel.isStart) {
               gFFI.serverModel.stopService();
             }
+            break;
+          }
+        case "toggle_privacy_screen":
+          {
+            gFFI.serverModel.togglePrivacyScreen();
             break;
           }
       }

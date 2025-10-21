@@ -39,6 +39,7 @@ class ServerModel with ChangeNotifier {
   bool _allowNumericOneTimePassword = false;
   String _approveMode = "";
   int _zeroClientLengthCounter = 0;
+  final privacyScreenEnabled = false.obs;
 
   late String _emptyIdShow;
   late final IDTextEditingController _serverId;
@@ -52,6 +53,10 @@ class ServerModel with ChangeNotifier {
   Timer? cmHiddenTimer;
 
   bool get isStart => _isStart;
+
+  void togglePrivacyScreen() {
+    privacyScreenEnabled.value = !privacyScreenEnabled.value;
+  }
 
   bool get mediaOk => _mediaOk;
 

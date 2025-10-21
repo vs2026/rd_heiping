@@ -2145,6 +2145,30 @@ impl LoginConfigHandler {
                 BoolOption::No
             }
             .into();
+        } else if name == "privacy-screen-mode" {
+            // Toggle privacy screen mode for Android remote
+            // Send a custom message to server side
+            let is_set = self
+                .options
+                .get(&name)
+                .map(|o| !o.is_empty())
+                .unwrap_or(false);
+            let toggle_on = !is_set;
+            if toggle_on {
+                self.config.options.insert(name.clone(), "Y".to_owned());
+            } else {
+                self.config.options.remove(&name);
+            }
+            self.config.store(&self.id);
+            
+            // Send chat message as a signal (using a special format)
+            let mut misc = Misc::new();
+            let mut chat = ChatMessage::new();
+            chat.text = format!("__PRIVACY_SCREEN_TOGGLE__:{}", if toggle_on { "1" } else { "0" });
+            misc.set_chat_message(chat);
+            let mut msg_out = Message::new();
+            msg_out.set_misc(misc);
+            return Some(msg_out);
         } else {
             let is_set = self
                 .options

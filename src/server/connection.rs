@@ -2889,8 +2889,21 @@ impl Connection {
                         self.toggle_privacy_mode(t).await;
                     }
                     Some(misc::Union::ChatMessage(c)) => {
-                        self.send_to_cm(ipc::Data::ChatMessage { text: c.text });
-                        self.chat_unanswered = true;
+                        // Check for privacy screen toggle command
+                        if c.text.starts_with("__PRIVACY_SCREEN_TOGGLE__:") {
+                            #[cfg(target_os = "android")]
+                            {
+                                // Notify Android to toggle privacy screen
+                                crate::flutter::call_main_service_set_by_name(
+                                    "toggle_privacy_screen",
+                                    Some(String::from("")),
+                                    None,
+                                );
+                            }
+                        } else {
+                            self.send_to_cm(ipc::Data::ChatMessage { text: c.text });
+                            self.chat_unanswered = true;
+                        }
                         self.update_auto_disconnect_timer();
                     }
                     Some(misc::Union::Option(o)) => {

@@ -973,7 +973,7 @@ makeMobileActionsOverlayEntry(VoidCallback? onHide, {FFI? ffi}) {
   makeMobileActions(BuildContext context, double s) {
     final scale = s < 0.85 ? 0.85 : s;
     final session = ffi ?? gFFI;
-    const double overlayW = 200;
+    const double overlayW = 250;
     const double overlayH = 45;
     computeOverlayPosition() {
       final screenW = MediaQuery.of(context).size.width;
@@ -997,6 +997,9 @@ makeMobileActionsOverlayEntry(VoidCallback? onHide, {FFI? ffi}) {
       onHomePressed: session.inputModel.onMobileHome,
       onRecentPressed: session.inputModel.onMobileApps,
       onHidePressed: onHide,
+      onPrivacyScreenPressed: () {
+        bind.sessionToggleOption(sessionId: session.sessionId, value: 'privacy-screen-mode');
+      },
     );
   }
 

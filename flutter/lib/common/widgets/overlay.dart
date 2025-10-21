@@ -175,6 +175,7 @@ class DraggableMobileActions extends StatelessWidget {
       this.onRecentPressed,
       this.onHomePressed,
       this.onHidePressed,
+      this.onPrivacyScreenPressed,
       required this.position,
       required this.width,
       required this.height,
@@ -188,6 +189,7 @@ class DraggableMobileActions extends StatelessWidget {
   final VoidCallback? onHomePressed;
   final VoidCallback? onRecentPressed;
   final VoidCallback? onHidePressed;
+  final VoidCallback? onPrivacyScreenPressed;
 
   @override
   Widget build(BuildContext context) {
@@ -226,6 +228,12 @@ class DraggableMobileActions extends StatelessWidget {
                             onPressed: onRecentPressed,
                             splashRadius: kDesktopIconButtonSplashRadius,
                             icon: const Icon(Icons.more_horiz),
+                            iconSize: 24 * scale),
+                        IconButton(
+                            color: Colors.white,
+                            onPressed: onPrivacyScreenPressed,
+                            splashRadius: kDesktopIconButtonSplashRadius,
+                            icon: const Icon(Icons.visibility_off),
                             iconSize: 24 * scale),
                         const VerticalDivider(
                           width: 0,
@@ -660,5 +668,41 @@ class BlockableOverlay extends StatelessWidget {
 
     /// set key
     return Overlay(key: state.key, initialEntries: initialEntries);
+  }
+}
+
+/// Privacy screen overlay for Android remote side
+class PrivacyScreenOverlay extends StatelessWidget {
+  final RxBool isEnabled;
+
+  const PrivacyScreenOverlay({Key? key, required this.isEnabled}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Obx(() {
+      if (!isEnabled.value) {
+        return const SizedBox.shrink();
+      }
+      
+      return Container(
+        width: double.infinity,
+        height: double.infinity,
+        color: Colors.black,
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(40.0),
+            child: Text(
+              translate('privacy_screen_enabled_tip'),
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ),
+        ),
+      );
+    });
   }
 }
