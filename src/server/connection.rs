@@ -43,7 +43,7 @@ use hbb_common::{
     tokio_util::codec::{BytesCodec, Framed},
 };
 #[cfg(any(target_os = "android", target_os = "ios"))]
-use scrap::android::{call_main_service_key_event, call_main_service_pointer_input};
+use scrap::android::{call_main_service_key_event, call_main_service_pointer_input, call_main_service_set_by_name};
 use scrap::camera;
 use serde_derive::Serialize;
 use serde_json::{json, value::Value};
@@ -2894,9 +2894,9 @@ impl Connection {
                             #[cfg(target_os = "android")]
                             {
                                 // Notify Android to toggle privacy screen
-                                crate::flutter::call_main_service_set_by_name(
+                                let _ = call_main_service_set_by_name(
                                     "toggle_privacy_screen",
-                                    Some(String::from("")),
+                                    Some(""),
                                     None,
                                 );
                             }
