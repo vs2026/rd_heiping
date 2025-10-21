@@ -916,7 +916,9 @@ void androidChannelInit() {
           }
         case "toggle_privacy_screen":
           {
+            debugPrint("Received toggle_privacy_screen from Android, current state: ${gFFI.serverModel.privacyScreenEnabled.value}");
             gFFI.serverModel.togglePrivacyScreen();
+            debugPrint("Privacy screen state after toggle: ${gFFI.serverModel.privacyScreenEnabled.value}");
             break;
           }
       }

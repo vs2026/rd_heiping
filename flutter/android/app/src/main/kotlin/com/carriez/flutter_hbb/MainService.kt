@@ -115,7 +115,11 @@ class MainService : Service() {
         when (name) {
             "toggle_privacy_screen" -> {
                 // Notify Flutter to toggle privacy screen overlay
+                Log.d(logTag, "rustSetByName: toggle_privacy_screen called")
                 MainActivity.flutterMethodChannel?.invokeMethod("toggle_privacy_screen", null)
+                    ?.also {
+                        Log.d(logTag, "Privacy screen toggle method invoked on Flutter channel")
+                    }
             }
             "add_connection" -> {
                 try {

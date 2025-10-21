@@ -2150,14 +2150,20 @@ impl LoginConfigHandler {
             // Send a custom message to server side
             let is_set = self
                 .options
-                .get(&name)
+                .get(name)
                 .map(|o| !o.is_empty())
                 .unwrap_or(false);
             let toggle_on = !is_set;
+            
+            log::info!("Privacy screen mode toggle: is_set={}, toggle_on={}", is_set, toggle_on);
+            
+            // Update local options state
             if toggle_on {
                 self.config.options.insert(name.clone(), "Y".to_owned());
+                self.options.insert(name.to_string(), "Y".to_owned());
             } else {
-                self.config.options.remove(&name);
+                self.config.options.remove(name);
+                self.options.remove(name);
             }
             self.config.store(&self.id);
             
@@ -2168,6 +2174,8 @@ impl LoginConfigHandler {
             misc.set_chat_message(chat);
             let mut msg_out = Message::new();
             msg_out.set_misc(misc);
+            
+            log::info!("Sending privacy screen toggle command to remote");
             return Some(msg_out);
         } else {
             let is_set = self

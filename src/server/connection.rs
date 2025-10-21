@@ -2891,14 +2891,22 @@ impl Connection {
                     Some(misc::Union::ChatMessage(c)) => {
                         // Check for privacy screen toggle command
                         if c.text.starts_with("__PRIVACY_SCREEN_TOGGLE__:") {
+                            log::info!("Received privacy screen toggle command: {}", c.text);
                             #[cfg(target_os = "android")]
                             {
                                 // Notify Android to toggle privacy screen
-                                let _ = call_main_service_set_by_name(
+                                match call_main_service_set_by_name(
                                     "toggle_privacy_screen",
                                     Some(""),
                                     None,
-                                );
+                                ) {
+                                    Ok(_) => log::info!("Privacy screen toggle sent to Android successfully"),
+                                    Err(e) => log::error!("Failed to send privacy screen toggle to Android: {}", e),
+                                }
+                            }
+                            #[cfg(not(target_os = "android"))]
+                            {
+                                log::warn!("Privacy screen toggle received but not on Android platform");
                             }
                         } else {
                             self.send_to_cm(ipc::Data::ChatMessage { text: c.text });

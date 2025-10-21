@@ -56,6 +56,7 @@ class ServerModel with ChangeNotifier {
 
   void togglePrivacyScreen() {
     privacyScreenEnabled.value = !privacyScreenEnabled.value;
+    debugPrint("ServerModel: Privacy screen toggled to ${privacyScreenEnabled.value}");
   }
 
   bool get mediaOk => _mediaOk;
