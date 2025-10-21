@@ -1483,7 +1483,7 @@ impl AudioHandler {
 
                 let mut n = data.len();
                 let mut lock = audio_buffer.lock().unwrap();
-                let mut having = lock.occupied_len();
+                let having = lock.occupied_len();
                 // android two timestamps, one from zero, another not
                 #[cfg(not(target_os = "android"))]
                 if having < n {
@@ -2149,6 +2149,7 @@ impl LoginConfigHandler {
             // Toggle privacy screen mode for Android remote
             // Send a custom message to server side
             let is_set = self
+                .config
                 .options
                 .get(&name)
                 .map(|o| !o.is_empty())
@@ -2160,10 +2161,8 @@ impl LoginConfigHandler {
             // Update local options state
             if toggle_on {
                 self.config.options.insert(name.clone(), "Y".to_owned());
-                self.options.insert(name.to_string(), "Y".to_owned());
             } else {
                 self.config.options.remove(&name);
-                self.options.remove(&name);
             }
             self.config.store(&self.id);
             
