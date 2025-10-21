@@ -2150,7 +2150,7 @@ impl LoginConfigHandler {
             // Send a custom message to server side
             let is_set = self
                 .options
-                .get(name)
+                .get(&name)
                 .map(|o| !o.is_empty())
                 .unwrap_or(false);
             let toggle_on = !is_set;
@@ -2162,8 +2162,8 @@ impl LoginConfigHandler {
                 self.config.options.insert(name.clone(), "Y".to_owned());
                 self.options.insert(name.to_string(), "Y".to_owned());
             } else {
-                self.config.options.remove(name);
-                self.options.remove(name);
+                self.config.options.remove(&name);
+                self.options.remove(&name);
             }
             self.config.store(&self.id);
             

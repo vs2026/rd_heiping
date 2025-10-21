@@ -1487,10 +1487,10 @@ impl Connection {
 
         // Terminal feature is supported on desktop only
         #[allow(unused_mut)]
-        let mut terminal = cfg!(not(any(target_os = "android", target_os = "ios")));
+        let mut _terminal = cfg!(not(any(target_os = "android", target_os = "ios")));
         #[cfg(target_os = "windows")]
         {
-            terminal = terminal && portable_pty::win::check_support().is_ok();
+            _terminal = _terminal && portable_pty::win::check_support().is_ok();
         }
         pi.username = username;
         pi.sas_enabled = sas_enabled;
@@ -3086,9 +3086,9 @@ impl Connection {
                         self.refresh_video_display(Some(request.display as usize));
                     }
                 }
-                Some(message::Union::TerminalAction(action)) => {
+                Some(message::Union::TerminalAction(_action)) => {
                     #[cfg(not(any(target_os = "android", target_os = "ios")))]
-                    allow_err!(self.handle_terminal_action(action).await);
+                    allow_err!(self.handle_terminal_action(_action).await);
                     #[cfg(any(target_os = "android", target_os = "ios"))]
                     log::warn!("Terminal action received but not supported on this platform");
                 }
