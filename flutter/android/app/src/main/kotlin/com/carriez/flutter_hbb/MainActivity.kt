@@ -267,10 +267,6 @@ class MainActivity : FlutterActivity() {
                 "on_voice_call_closed" -> {
                     onVoiceCallClosed()
                 }
-                "toggle_privacy_overlay" -> {
-                    mainService?.togglePrivacyOverlay()
-                    result.success(true)
-                }
                 else -> {
                     result.error("-1", "No such method", null)
                 }

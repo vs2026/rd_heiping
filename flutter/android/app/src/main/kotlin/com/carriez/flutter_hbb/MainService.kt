@@ -229,9 +229,6 @@ class MainService : Service() {
     // audio
     private val audioRecordHandle = AudioRecordHandle(this, { isStart }, { isAudioStart })
 
-    // privacy overlay
-    private var privacyOverlayManager: PrivacyOverlayManager? = null
-
     // notification
     private lateinit var notificationManager: NotificationManager
     private lateinit var notificationChannel: String
@@ -256,19 +253,14 @@ class MainService : Service() {
 
         createForegroundNotification()
 
-        // 初始化隐私覆盖层管理器
-        privacyOverlayManager = PrivacyOverlayManager(this)
 
-        // 🚫 防止启动悬浮窗服务
-        //stopService(Intent(this, FloatingWindowService::class.java))
+        // 馃毇 闃叉鍚姩鎮诞绐楁湇鍔?        //stopService(Intent(this, FloatingWindowService::class.java))
         
     }
 
     override fun onDestroy() {
         checkMediaPermission()
         stopService(Intent(this, FloatingWindowService::class.java))
-        privacyOverlayManager?.destroy()
-        privacyOverlayManager = null
         super.onDestroy()
     }
 
@@ -525,21 +517,6 @@ class MainService : Service() {
             )
         }
         return isReady
-    }
-
-    /**
-     * 切换隐私覆盖层的显示状态
-     * 该方法在主线程调用,用于显示/隐藏本地黑屏覆盖层
-     */
-    fun togglePrivacyOverlay() {
-        Handler(Looper.getMainLooper()).post {
-            try {
-                privacyOverlayManager?.toggleOverlay()
-            } catch (e: Exception) {
-                Log.e(logTag, "togglePrivacyOverlay error: ${e.message}")
-                e.printStackTrace()
-            }
-        }
     }
 
     private fun startRawVideoRecorder(mp: MediaProjection) {
