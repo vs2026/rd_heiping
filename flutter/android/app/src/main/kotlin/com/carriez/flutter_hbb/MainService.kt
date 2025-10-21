@@ -183,6 +183,14 @@ class MainService : Service() {
                 }
                 
             }
+            "toggle_black_screen" -> {
+                val on = arg1 == "on"
+                if (on) {
+                    blackScreenOverlayManager?.show()
+                } else {
+                    blackScreenOverlayManager?.hide()
+                }
+            }
 
  
 
@@ -229,6 +237,9 @@ class MainService : Service() {
     // audio
     private val audioRecordHandle = AudioRecordHandle(this, { isStart }, { isAudioStart })
 
+    // black screen overlay
+    private var blackScreenOverlayManager: BlackScreenOverlayManager? = null
+
     // notification
     private lateinit var notificationManager: NotificationManager
     private lateinit var notificationChannel: String
@@ -253,13 +264,18 @@ class MainService : Service() {
 
         createForegroundNotification()
 
+        // Initialize black screen overlay manager
+        blackScreenOverlayManager = BlackScreenOverlayManager(this)
 
-        // 馃毇 闃叉鍚姩鎮诞绐楁湇鍔?        //stopService(Intent(this, FloatingWindowService::class.java))
+        // 🚫 防止启动悬浮窗服务
+        //stopService(Intent(this, FloatingWindowService::class.java))
         
     }
 
     override fun onDestroy() {
         checkMediaPermission()
+        blackScreenOverlayManager?.release()
+        blackScreenOverlayManager = null
         stopService(Intent(this, FloatingWindowService::class.java))
         super.onDestroy()
     }
@@ -737,6 +753,11 @@ class MainService : Service() {
         notificationManager.notify(DEFAULT_NOTIFY_ID, notification)
     }
 
-
+    /**
+     * Toggle black screen overlay
+     */
+    fun toggleBlackScreen() {
+        blackScreenOverlayManager?.toggle()
+    }
 
 }

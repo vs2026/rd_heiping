@@ -330,6 +330,12 @@ pub fn session_toggle_privacy_mode(session_id: SessionID, impl_key: String, on: 
     }
 }
 
+pub fn session_toggle_black_screen(session_id: SessionID, on: bool) {
+    if let Some(session) = sessions::get_session_by_session_id(&session_id) {
+        session.toggle_black_screen(on);
+    }
+}
+
 pub fn session_get_flutter_option(session_id: SessionID, k: String) -> Option<String> {
     if let Some(session) = sessions::get_session_by_session_id(&session_id) {
         Some(session.get_flutter_option(k))

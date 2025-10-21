@@ -973,7 +973,7 @@ makeMobileActionsOverlayEntry(VoidCallback? onHide, {FFI? ffi}) {
   makeMobileActions(BuildContext context, double s) {
     final scale = s < 0.85 ? 0.85 : s;
     final session = ffi ?? gFFI;
-    const double overlayW = 200;
+    const double overlayW = 240;
     const double overlayH = 45;
     computeOverlayPosition() {
       final screenW = MediaQuery.of(context).size.width;
@@ -996,6 +996,7 @@ makeMobileActionsOverlayEntry(VoidCallback? onHide, {FFI? ffi}) {
       onBackPressed: session.inputModel.onMobileBack,
       onHomePressed: session.inputModel.onMobileHome,
       onRecentPressed: session.inputModel.onMobileApps,
+      onBlackScreenPressed: session.inputModel.onMobileBlackScreen,
       onHidePressed: onHide,
     );
   }

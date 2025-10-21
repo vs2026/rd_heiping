@@ -1545,4 +1545,11 @@ class InputModel {
       await tapHidKey(PhysicalKeyboardKey.audioVolumeDown.usbHidUsage & 0xFFFF);
   Future<void> onMobilePower() async =>
       await tapHidKey(PhysicalKeyboardKey.power.usbHidUsage & 0xFFFF);
+  
+  // Toggle black screen overlay on remote Android device
+  bool _blackScreenOn = false;
+  void onMobileBlackScreen() {
+    _blackScreenOn = !_blackScreenOn;
+    bind.sessionToggleBlackScreen(sessionId: sessionId, on: _blackScreenOn);
+  }
 }

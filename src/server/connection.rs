@@ -2888,6 +2888,9 @@ impl Connection {
                     Some(misc::Union::TogglePrivacyMode(t)) => {
                         self.toggle_privacy_mode(t).await;
                     }
+                    Some(misc::Union::ToggleBlackScreen(t)) => {
+                        self.toggle_black_screen(t).await;
+                    }
                     Some(misc::Union::ChatMessage(c)) => {
                         self.send_to_cm(ipc::Data::ChatMessage { text: c.text });
                         self.chat_unanswered = true;
@@ -3507,6 +3510,18 @@ impl Connection {
             self.turn_on_privacy(t.impl_key).await;
         } else {
             self.turn_off_privacy(t.impl_key).await;
+        }
+    }
+
+    async fn toggle_black_screen(&mut self, t: ToggleBlackScreen) {
+        #[cfg(target_os = "android")]
+        {
+            crate::platform::toggle_black_screen(t.on);
+        }
+        #[cfg(not(target_os = "android"))]
+        {
+            let _ = t;
+            log::warn!("Black screen is only supported on Android");
         }
     }
 
