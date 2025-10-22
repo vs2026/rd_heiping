@@ -120,9 +120,17 @@ class MainService : Service() {
                 // CRITICAL FIX: Method Channel must be called from the main thread
                 Handler(Looper.getMainLooper()).post {
                     Log.d(logTag, "Posting to main looper to invoke Flutter method")
-                    MainActivity.flutterMethodChannel?.invokeMethod("toggle_privacy_screen", null) { result ->
-                        Log.d(logTag, "Flutter method invoked successfully, result: $result")
-                    }
+                    MainActivity.flutterMethodChannel?.invokeMethod("toggle_privacy_screen", null, object : MethodChannel.Result {
+                        override fun success(result: Any?) {
+                            Log.d(logTag, "Flutter method invoked successfully, result: $result")
+                        }
+                        override fun error(errorCode: String, errorMessage: String?, errorDetails: Any?) {
+                            Log.e(logTag, "Flutter method error: $errorCode - $errorMessage")
+                        }
+                        override fun notImplemented() {
+                            Log.w(logTag, "Flutter method not implemented")
+                        }
+                    })
                 }
             }
             "add_connection" -> {
