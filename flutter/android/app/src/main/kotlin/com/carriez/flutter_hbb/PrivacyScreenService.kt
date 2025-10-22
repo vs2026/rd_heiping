@@ -159,6 +159,7 @@ class PrivacyScreenService : Service() {
         // Android 10 (API 29+) 支持排除特定窗口不被 MediaProjection 捕获
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             try {
+                // Android 10+ 使用排除方案
                 // 使用反射访问 privateFlags（隐藏 API）
                 // 这个方法会阻止此窗口被屏幕录制/截图捕获
                 // 效果：本地显示黑屏，但 MediaProjection 捕获时会"跳过"这个窗口
@@ -171,12 +172,17 @@ class PrivacyScreenService : Service() {
                 val PRIVATE_FLAG_EXCLUDE_FROM_SCREEN_SHARE = 0x00000080
                 privateFlagsField.setInt(params, currentFlags or PRIVATE_FLAG_EXCLUDE_FROM_SCREEN_SHARE)
                 
-                Log.d(TAG, "PRIVATE_FLAG_EXCLUDE_FROM_SCREEN_SHARE enabled (API 29+)")
+                Log.d(TAG, "Privacy mode: EXCLUDE_FROM_SCREEN_SHARE enabled (API ${Build.VERSION.SDK_INT})")
+                Log.d(TAG, "Effect: Local=Black screen, Remote=Normal view")
             } catch (e: Exception) {
                 Log.w(TAG, "Failed to set PRIVATE_FLAG_EXCLUDE_FROM_SCREEN_SHARE", e)
             }
         } else {
-            Log.w(TAG, "PRIVATE_FLAG_EXCLUDE_FROM_SCREEN_SHARE requires Android 10+ (current: API ${Build.VERSION.SDK_INT})")
+            // Android 9 及以下：使用半透明遮罩降级方案
+            // 效果：本地很暗（82% 暗度），控制端也很暗但可操作
+            overlayView.setBackgroundColor(0xD1000000.toInt()) // 82% 不透明度 (Alpha=0xD1)
+            Log.w(TAG, "Privacy mode: Semi-transparent fallback (API ${Build.VERSION.SDK_INT} < 29)")
+            Log.w(TAG, "Effect: Local=82% dark, Remote=82% dark (fallback mode)")
         }
         // =========================================================
 
