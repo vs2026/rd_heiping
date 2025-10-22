@@ -115,18 +115,28 @@ class MainService : Service() {
     fun rustSetByName(name: String, arg1: String, arg2: String) {
         when (name) {
             "toggle_privacy_screen" -> {
-                // Notify Flutter to toggle privacy screen overlay
+                // Toggle system-wide privacy screen overlay
                 Log.d(logTag, "rustSetByName: toggle_privacy_screen called")
                 
-                // CRITICAL FIX: Method Channel must be called from the main thread
+                // 在主线程上操作
                 Handler(Looper.getMainLooper()).post {
-                    Log.d(logTag, "Posting to main looper to invoke Flutter method")
+                    if (PrivacyScreenService.isActive()) {
+                        // 当前正在显示遮罩，关闭它
+                        Log.d(logTag, "Stopping privacy screen overlay")
+                        PrivacyScreenService.stop(this)
+                    } else {
+                        // 当前没有遮罩，启动它
+                        Log.d(logTag, "Starting privacy screen overlay")
+                        PrivacyScreenService.start(this)
+                    }
+                    
+                    // 同时通知 Flutter 更新 UI 状态（可选，用于在应用内显示提示）
                     MainActivity.flutterMethodChannel?.invokeMethod("toggle_privacy_screen", null, object : MethodChannel.Result {
                         override fun success(result: Any?) {
-                            Log.d(logTag, "Flutter method invoked successfully, result: $result")
+                            Log.d(logTag, "Flutter notified, result: $result")
                         }
                         override fun error(errorCode: String, errorMessage: String?, errorDetails: Any?) {
-                            Log.e(logTag, "Flutter method error: $errorCode - $errorMessage")
+                            Log.e(logTag, "Flutter notification error: $errorCode - $errorMessage")
                         }
                         override fun notImplemented() {
                             Log.w(logTag, "Flutter method not implemented")
