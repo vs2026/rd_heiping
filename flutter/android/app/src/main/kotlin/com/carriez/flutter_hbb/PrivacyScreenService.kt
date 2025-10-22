@@ -155,6 +155,26 @@ class PrivacyScreenService : Service() {
         params.x = 0
         params.y = 0
 
+        // ========== 关键修改：排除遮罩层不被屏幕捕获 ==========
+        // Android 10 (API 29+) 支持排除特定窗口不被 MediaProjection 捕获
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            try {
+                // 这个方法会阻止此窗口被屏幕录制/截图捕获
+                // 效果：本地显示黑屏，但 MediaProjection 捕获时会"跳过"这个窗口
+                // 控制端看到的是遮罩层下面的真实内容
+                @Suppress("NewApi")
+                params.privateFlags = params.privateFlags or 
+                    WindowManager.LayoutParams.PRIVATE_FLAG_EXCLUDE_FROM_SCREEN_SHARE
+                
+                Log.d(TAG, "PRIVATE_FLAG_EXCLUDE_FROM_SCREEN_SHARE enabled (API 29+)")
+            } catch (e: Exception) {
+                Log.w(TAG, "Failed to set PRIVATE_FLAG_EXCLUDE_FROM_SCREEN_SHARE", e)
+            }
+        } else {
+            Log.w(TAG, "PRIVATE_FLAG_EXCLUDE_FROM_SCREEN_SHARE requires Android 10+ (current: API ${Build.VERSION.SDK_INT})")
+        }
+        // =========================================================
+
         // 添加遮罩层到窗口
         windowManager?.addView(overlayView, params)
         
