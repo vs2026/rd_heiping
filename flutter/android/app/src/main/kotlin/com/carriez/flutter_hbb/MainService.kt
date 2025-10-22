@@ -130,18 +130,11 @@ class MainService : Service() {
                         PrivacyScreenService.start(this)
                     }
                     
-                    // 同时通知 Flutter 更新 UI 状态（可选，用于在应用内显示提示）
-                    MainActivity.flutterMethodChannel?.invokeMethod("toggle_privacy_screen", null, object : MethodChannel.Result {
-                        override fun success(result: Any?) {
-                            Log.d(logTag, "Flutter notified, result: $result")
-                        }
-                        override fun error(errorCode: String, errorMessage: String?, errorDetails: Any?) {
-                            Log.e(logTag, "Flutter notification error: $errorCode - $errorMessage")
-                        }
-                        override fun notImplemented() {
-                            Log.w(logTag, "Flutter method not implemented")
-                        }
-                    })
+                    // ========== 修复：不通知 Flutter 层 ==========
+                    // 系统级遮罩已经足够，不需要 Flutter 再显示一层黑屏
+                    // 避免双重黑屏叠加导致被控端 UI 不可见
+                    Log.d(logTag, "Privacy screen toggled, Flutter notification skipped to avoid double overlay")
+                    // ============================================
                 }
             }
             "add_connection" -> {
