@@ -1497,7 +1497,7 @@ impl Connection {
         pi.features = Some(Features {
             privacy_mode: privacy_mode::is_privacy_mode_supported(),
             #[cfg(not(any(target_os = "android", target_os = "ios")))]
-            terminal,
+            terminal: _terminal,
             ..Default::default()
         })
         .into();
