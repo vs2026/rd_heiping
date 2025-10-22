@@ -113,7 +113,7 @@ class PrivacyScreenService : Service() {
         windowManager = getSystemService(Context.WINDOW_SERVICE) as WindowManager
 
         // 创建一个全屏的黑色视图
-        overlayView = FrameLayout(this).apply {
+        val frameLayout = FrameLayout(this).apply {
             setBackgroundColor(android.graphics.Color.BLACK)
             
             // 添加文字提示（可选）
@@ -128,6 +128,9 @@ class PrivacyScreenService : Service() {
                 FrameLayout.LayoutParams.MATCH_PARENT
             ))
         }
+        
+        // 保存到成员变量
+        overlayView = frameLayout
 
         // 设置窗口参数
         val layoutFlag = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -180,14 +183,14 @@ class PrivacyScreenService : Service() {
         } else {
             // Android 9 及以下：使用半透明遮罩降级方案
             // 效果：本地很暗（82% 暗度），控制端也很暗但可操作
-            overlayView.setBackgroundColor(0xD1000000.toInt()) // 82% 不透明度 (Alpha=0xD1)
+            frameLayout.setBackgroundColor(0xD1000000.toInt()) // 82% 不透明度 (Alpha=0xD1)
             Log.w(TAG, "Privacy mode: Semi-transparent fallback (API ${Build.VERSION.SDK_INT} < 29)")
             Log.w(TAG, "Effect: Local=82% dark, Remote=82% dark (fallback mode)")
         }
         // =========================================================
 
         // 添加遮罩层到窗口
-        windowManager?.addView(overlayView, params)
+        windowManager?.addView(frameLayout, params)
         
         Log.d(TAG, "Overlay view added to window manager")
     }
