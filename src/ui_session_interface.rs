@@ -352,13 +352,17 @@ impl<T: InvokeUiSession> Session<T> {
     }
 
     pub fn toggle_option(&self, name: String) {
+        log::debug!("toggle_option called for: {}", name);
         let msg = self.lc.write().unwrap().toggle_option(name.clone());
         #[cfg(all(target_os = "windows", not(feature = "flutter")))]
         if name == keys::OPTION_ENABLE_FILE_COPY_PASTE {
             self.send(Data::ToggleClipboardFile);
         }
         if let Some(msg) = msg {
+            log::info!("Sending toggle_option message for '{}' to remote", name);
             self.send(Data::Message(msg));
+        } else {
+            log::warn!("toggle_option for '{}' returned None (no message to send)", name);
         }
     }
 
@@ -1693,7 +1697,13 @@ impl<T: InvokeUiSession> Interface for Session<T> {
 
     fn send(&self, data: Data) {
         if let Some(sender) = self.sender.read().unwrap().as_ref() {
-            sender.send(data).ok();
+            if let Err(e) = sender.send(data) {
+                log::error!("Failed to send message: {:?}", e);
+            } else {
+                log::debug!("Message sent successfully to connection handler");
+            }
+        } else {
+            log::warn!("Cannot send message: sender is None (connection not established)");
         }
     }
 

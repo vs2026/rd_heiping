@@ -116,10 +116,14 @@ class MainService : Service() {
             "toggle_privacy_screen" -> {
                 // Notify Flutter to toggle privacy screen overlay
                 Log.d(logTag, "rustSetByName: toggle_privacy_screen called")
-                MainActivity.flutterMethodChannel?.invokeMethod("toggle_privacy_screen", null)
-                    ?.also {
-                        Log.d(logTag, "Privacy screen toggle method invoked on Flutter channel")
+                
+                // CRITICAL FIX: Method Channel must be called from the main thread
+                Handler(Looper.getMainLooper()).post {
+                    Log.d(logTag, "Posting to main looper to invoke Flutter method")
+                    MainActivity.flutterMethodChannel?.invokeMethod("toggle_privacy_screen", null) { result ->
+                        Log.d(logTag, "Flutter method invoked successfully, result: $result")
                     }
+                }
             }
             "add_connection" -> {
                 try {

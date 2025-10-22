@@ -731,6 +731,7 @@ impl Connection {
                                 last_recv_time = Instant::now();
                                 conn.session_last_recv_time.as_mut().map(|t| *t.lock().unwrap() = Instant::now());
                                 if let Ok(msg_in) = Message::parse_from_bytes(&bytes) {
+                                    log::trace!("Received message, type: {:?}", msg_in.union);
                                     if !conn.on_message(msg_in).await {
                                         break;
                                     }
@@ -2001,6 +2002,9 @@ impl Connection {
 
     async fn on_message(&mut self, msg: Message) -> bool {
         if let Some(message::Union::Misc(misc)) = &msg.union {
+            // Log all Misc messages for debugging
+            log::debug!("Received Misc message, union type: {:?}", misc.union);
+            
             // Move the CloseReason forward, as this message needs to be received when unauthorized, especially for kcp.
             if let Some(misc::Union::CloseReason(s)) = &misc.union {
                 log::info!("receive close reason: {}", s);
