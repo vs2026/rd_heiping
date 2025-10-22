@@ -1483,7 +1483,7 @@ impl AudioHandler {
 
                 let mut n = data.len();
                 let mut lock = audio_buffer.lock().unwrap();
-                let having = lock.occupied_len();
+                let mut having = lock.occupied_len();
                 // android two timestamps, one from zero, another not
                 #[cfg(not(target_os = "android"))]
                 if having < n {
