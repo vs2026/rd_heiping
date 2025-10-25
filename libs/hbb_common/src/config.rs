@@ -102,7 +102,7 @@ const CHARS: &[char] = &[
 ];
 
 pub const RENDEZVOUS_SERVERS: &[&str] = &["rd.arphy.top"];
-pub const RS_PUB_KEY: &str = "xMPbjR5E4c4utTUkAxnbP3YtWaOeDleT433ARIexdO4=";
+pub const RS_PUB_KEY: &str = "vgQpFckwIriIpkPUIAF9MPUPNillJ4xpqkGBiOcfVvA=";
 
 pub const RENDEZVOUS_PORT: i32 = 21116;
 pub const RELAY_PORT: i32 = 21117;
