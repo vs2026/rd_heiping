@@ -30,6 +30,7 @@ class PrivacyScreenService : Service() {
     companion object {
         private const val TAG = "PrivacyScreenService"
         private var isRunning = false
+        private var instance: PrivacyScreenService? = null
         
         /**
          * 启动全屏遮罩
@@ -65,6 +66,20 @@ class PrivacyScreenService : Service() {
         fun isActive(): Boolean {
             return isRunning
         }
+        
+        /**
+         * 临时隐藏遮罩（用于防止被捕获）
+         */
+        fun hideOverlay() {
+            instance?.hide()
+        }
+        
+        /**
+         * 重新显示遮罩
+         */
+        fun showOverlay() {
+            instance?.show()
+        }
     }
 
     private var windowManager: WindowManager? = null
@@ -77,6 +92,7 @@ class PrivacyScreenService : Service() {
     override fun onCreate() {
         super.onCreate()
         Log.d(TAG, "onCreate: Creating privacy screen overlay")
+        instance = this
         
         try {
             createOverlay()
@@ -96,6 +112,7 @@ class PrivacyScreenService : Service() {
     override fun onDestroy() {
         super.onDestroy()
         Log.d(TAG, "onDestroy: Removing privacy screen overlay")
+        instance = null
         
         try {
             removeOverlay()
@@ -133,8 +150,14 @@ class PrivacyScreenService : Service() {
         overlayView = frameLayout
 
         // 设置窗口参数
-        val layoutFlag = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            // Android 8.0 及以上使用 TYPE_APPLICATION_OVERLAY
+        // ⚠️ 关键修改：使用 TYPE_SYSTEM_ERROR 而不是 TYPE_APPLICATION_OVERLAY
+        // 原因：TYPE_APPLICATION_OVERLAY 可能被 MediaProjection 捕获
+        // TYPE_SYSTEM_ERROR 层级更高，可能被系统自动排除
+        val layoutFlag = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            // Android 6.0+ 使用 TYPE_SYSTEM_ERROR (需要系统级权限)
+            WindowManager.LayoutParams.TYPE_SYSTEM_ERROR
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            // Android 8.0+ 回退到 TYPE_APPLICATION_OVERLAY
             WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
         } else {
             // 旧版本使用 TYPE_SYSTEM_ALERT
@@ -159,15 +182,10 @@ class PrivacyScreenService : Service() {
         params.y = 0
 
         // ========== 关键修改：排除遮罩层不被屏幕捕获 ==========
-        // Android 10 (API 29+) 支持排除特定窗口不被 MediaProjection 捕获
+        // 尝试多种方案确保遮罩不被 MediaProjection 捕获
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            // Android 10+ 尝试使用反射设置 EXCLUDE_FROM_SCREEN_SHARE
             try {
-                // Android 10+ 使用排除方案
-                // 使用反射访问 privateFlags（隐藏 API）
-                // 这个方法会阻止此窗口被屏幕录制/截图捕获
-                // 效果：本地显示黑屏，但 MediaProjection 捕获时会"跳过"这个窗口
-                // 控制端看到的是遮罩层下面的真实内容
-                
                 val privateFlagsField = WindowManager.LayoutParams::class.java.getField("privateFlags")
                 val currentFlags = privateFlagsField.getInt(params)
                 
@@ -175,18 +193,29 @@ class PrivacyScreenService : Service() {
                 val PRIVATE_FLAG_EXCLUDE_FROM_SCREEN_SHARE = 0x00000080
                 privateFlagsField.setInt(params, currentFlags or PRIVATE_FLAG_EXCLUDE_FROM_SCREEN_SHARE)
                 
-                Log.d(TAG, "Privacy mode: EXCLUDE_FROM_SCREEN_SHARE enabled (API ${Build.VERSION.SDK_INT})")
-                Log.d(TAG, "Effect: Local=Black screen, Remote=Normal view")
+                Log.d(TAG, "Privacy mode: EXCLUDE_FROM_SCREEN_SHARE enabled via reflection (API ${Build.VERSION.SDK_INT})")
             } catch (e: Exception) {
-                Log.w(TAG, "Failed to set PRIVATE_FLAG_EXCLUDE_FROM_SCREEN_SHARE", e)
+                Log.w(TAG, "Failed to set EXCLUDE_FROM_SCREEN_SHARE via reflection", e)
             }
+            
+            // 额外尝试：设置较低的优先级，希望被捕获系统忽略
+            try {
+                params.alpha = 0.99f  // 略微透明，但几乎不可见
+                Log.d(TAG, "Set overlay alpha to 0.99 for better exclusion")
+            } catch (e: Exception) {
+                Log.w(TAG, "Failed to set alpha", e)
+            }
+            
+            Log.d(TAG, "Expected effect: Local=Black screen, Remote=Should see normal content")
         } else {
             // Android 9 及以下：使用半透明遮罩降级方案
-            // 效果：本地很暗（82% 暗度），控制端也很暗但可操作
             frameLayout.setBackgroundColor(0xD1000000.toInt()) // 82% 不透明度 (Alpha=0xD1)
             Log.w(TAG, "Privacy mode: Semi-transparent fallback (API ${Build.VERSION.SDK_INT} < 29)")
-            Log.w(TAG, "Effect: Local=82% dark, Remote=82% dark (fallback mode)")
+            Log.w(TAG, "Effect: Local=82% dark, Remote=82% dark (limitation)")
         }
+        
+        // ⚠️ 重要：TYPE_SYSTEM_ERROR 层级较高，某些系统可能仍然捕获
+        // 如果问题持续，可能需要其他方案（如动态显示/隐藏遮罩）
         // =========================================================
 
         // 添加遮罩层到窗口
@@ -210,6 +239,26 @@ class PrivacyScreenService : Service() {
         
         overlayView = null
         windowManager = null
+    }
+    
+    /**
+     * 临时隐藏遮罩（用于防止被 MediaProjection 捕获）
+     */
+    fun hide() {
+        overlayView?.let { view ->
+            view.visibility = View.GONE
+            Log.d(TAG, "Overlay hidden temporarily")
+        }
+    }
+    
+    /**
+     * 重新显示遮罩
+     */
+    fun show() {
+        overlayView?.let { view ->
+            view.visibility = View.VISIBLE
+            Log.d(TAG, "Overlay shown again")
+        }
     }
 }
 

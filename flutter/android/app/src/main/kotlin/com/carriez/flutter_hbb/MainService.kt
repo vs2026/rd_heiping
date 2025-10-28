@@ -449,6 +449,14 @@ class MainService : Service() {
         
         updateScreenInfo(resources.configuration.orientation)
         Log.d(logTag, "Start Capture")
+        
+        // ⚠️ 关键修复：在启动捕获前临时隐藏隐私屏遮罩
+        // 这可以防止遮罩被 MediaProjection 捕获，导致控制端看到黑屏
+        if (PrivacyScreenService.isActive()) {
+            Log.d(logTag, "Hiding privacy screen overlay before capture to prevent black screen on control side")
+            PrivacyScreenService.hideOverlay()
+        }
+        
         surface = createSurface()
 
         if (useVP9) {
@@ -469,6 +477,15 @@ class MainService : Service() {
         _isStart = true
         FFI.setFrameRawEnable("video",true)
         MainActivity.rdClipboardManager?.setCaptureStarted(_isStart)
+        
+        // 重新显示遮罩（延迟一帧，确保虚拟显示器已创建）
+        if (PrivacyScreenService.isActive()) {
+            Handler(Looper.getMainLooper()).postDelayed({
+                Log.d(logTag, "Re-showing privacy screen overlay after capture started")
+                PrivacyScreenService.showOverlay()
+            }, 100) // 延迟 100ms 以确保虚拟显示器已完全初始化
+        }
+        
         return true
     }
 
