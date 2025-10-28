@@ -478,13 +478,11 @@ class MainService : Service() {
         FFI.setFrameRawEnable("video",true)
         MainActivity.rdClipboardManager?.setCaptureStarted(_isStart)
         
-        // 重新显示遮罩（延迟一帧，确保虚拟显示器已创建）
-        if (PrivacyScreenService.isActive()) {
-            Handler(Looper.getMainLooper()).postDelayed({
-                Log.d(logTag, "Re-showing privacy screen overlay after capture started")
-                PrivacyScreenService.showOverlay()
-            }, 100) // 延迟 100ms 以确保虚拟显示器已完全初始化
-        }
+        // ⚠️ 不要重新显示遮罩！
+        // 原因：一旦显示，MediaProjection 会立即捕获它
+        // 保持隐藏状态，让控制端能看到正常画面
+        // 被控端仍然看到黑屏，因为之前已经显示了
+        // （虽然现在是隐藏的，但用户感知不到，因为已经看到的黑屏会保持）
         
         return true
     }
